@@ -870,13 +870,72 @@
   }
   .spinner-result.show { opacity: 1; }
 
-  /* 响应式 */
+  /* ============================================================
+     移动端响应式
+  ============================================================ */
   @media (max-width: 700px) {
+    /* --- 主页 --- */
+    .home-title {
+      font-size: 36px; letter-spacing: 4px;
+      margin-bottom: 8px; padding: 0 10px;
+      text-align: center;
+    }
+    .home-subtitle {
+      font-size: 13px; letter-spacing: 3px;
+      margin-bottom: 20px; padding: 0 10px;
+      text-align: center;
+    }
+    .moon { top: 20px; right: 20px; width: 50px; height: 50px; }
+    .witch-spider { top: 80px; left: 10px; font-size: 24px; }
+    .home-cauldron { bottom: 30px; font-size: 50px; }
+
+    /* 钱包栏 */
+    .wallet-bar {
+      gap: 8px; padding: 8px 12px;
+      margin: 0 10px 16px;
+      flex-wrap: wrap; justify-content: center;
+    }
+    .wallet-amount { font-size: 24px; }
+    .wallet-cost { font-size: 11px; padding-left: 8px; border-left: none; }
+    .wallet-coin { font-size: 22px; }
+    .recharge-btn-home { padding: 6px 12px; font-size: 12px; }
+    .stats-btn-home { padding: 6px 12px; font-size: 12px; }
+
+    /* 自定义设置 */
+    .custom-setup { margin: 0 10px; padding: 12px 14px; }
+    .avatar-grid { gap: 8px; }
+    .avatar-grid img { width: 44px; height: 44px; }
+
+    /* 按钮 */
+    .btn-witch { padding: 12px 28px; font-size: 16px; letter-spacing: 2px; }
+
+    /* --- 规则页 --- */
+    .rules-title { font-size: 24px; letter-spacing: 3px; }
+    .rules-images-wrap img { width: 90vw; min-width: auto; max-width: 100%; }
+
+    /* --- 匹配页 --- */
+    .match-title { font-size: 22px; }
+    .match-player-slot { width: 100px; height: 130px; }
+    .match-players { gap: 12px; }
+
+    /* --- 游戏页 --- */
     .game-body { flex-direction: column; }
     .players-panel { width: 100%; flex-direction: row; overflow-x: auto; }
-    .player-card { min-width: 80px; }
+    .player-card { min-width: 70px; padding: 6px; font-size: 11px; }
     .tools-panel { width: 100%; flex-direction: row; overflow-x: auto; }
-    .tool-pile { flex-direction: row; flex: none; height: 100px; }
+    .tool-pile { flex-direction: row; flex: none; height: 90px; }
+    .board { grid-template-columns: repeat(5, 1fr); gap: 4px; max-width: 95vw; }
+    .card { padding: 4px; }
+    .card-img { width: 50px; height: 50px; }
+
+    /* --- 排名页 --- */
+    .rank-box { width: 90vw; padding: 16px; }
+
+    /* --- 充值弹窗 --- */
+    .recharge-box { max-width: 92vw; padding: 20px; }
+
+    /* --- 转盘 --- */
+    .spinner-wheel { width: 200px; height: 200px; }
   }
 
   /* ============================================================
