@@ -704,9 +704,11 @@
   ============================================================ */
   .wallet-bar {
     position: relative; z-index: 10;
-    display: flex; align-items: center; justify-content: center; gap: 30px;
+    display: flex; align-items: center; justify-content: center; gap: 16px;
     margin: 20px 0 40px;
     background: rgba(0,0,0,0.65);
+    flex-wrap: wrap;
+    padding: 10px 16px;
     border: 1px solid #c8a020;
     border-radius: 12px;
     padding: 12px 30px;
@@ -721,8 +723,10 @@
     transition: all 0.4s;
   }
   .wallet-cost {
-    font-size: 14px; color: #a080c0;
-    border-left: 1px solid #4a2050; padding-left: 20px;
+    font-size: 13px; color: #a080c0;
+    border-left: 1px solid #4a2050; padding-left: 14px;
+    white-space: nowrap;
+    line-height: 1.6;
   }
   .wallet-delta {
     display: inline-block; font-size: 18px; font-weight: bold;
@@ -1087,9 +1091,11 @@
 ====================================================== -->
 <div id="page-home" class="page active">
   <!-- 全屏视频背景 -->
-  <video id="home-video-bg" autoplay muted loop playsinline>
+  <video id="home-video-bg" autoplay muted loop playsinline poster="">
     <source src="b302c9894d9048244b6c0fc5a954d2a8.mp4" type="video/mp4">
   </video>
+  <!-- 视频加载失败时的静态背景 -->
+  <div id="home-video-fallback" style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg,#0d0315 0%,#1a0e2e 40%,#2a1040 70%,#0d0315 100%);z-index:0;display:none;"></div>
   <div class="home-overlay"></div>
   <div class="home-fog"></div>
   <div class="moon"></div>
@@ -3192,6 +3198,35 @@ function resetStats(){
 // ============================================================
 (function pageInit(){
   updateWalletDisplay();  // 显示上次保存的积分（默认10000）
+
+  // 视频自动播放fallback（移动端浏览器限制autoplay）
+  var video = document.getElementById('home-video-bg');
+  var fallback = document.getElementById('home-video-fallback');
+  if(video){
+    // 尝试强制播放
+    var playPromise = video.play();
+    if(playPromise !== undefined){
+      playPromise.then(function(){
+        if(fallback) fallback.style.display = 'none';
+      }).catch(function(){
+        // autoplay被阻止，再次尝试
+        setTimeout(function(){
+          video.play().then(function(){
+            if(fallback) fallback.style.display = 'none';
+          }).catch(function(){
+            // 最终失败，显示静态背景
+            if(fallback) fallback.style.display = 'block';
+            video.style.display = 'none';
+          });
+        }, 500);
+      });
+    }
+    // 视频加载失败时显示fallback
+    video.onerror = function(){
+      if(fallback) fallback.style.display = 'block';
+      video.style.display = 'none';
+    };
+  }
 
   // 恢复自定义名字
   var nameInput = document.getElementById('custom-name');
