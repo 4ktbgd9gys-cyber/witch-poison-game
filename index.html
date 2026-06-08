@@ -1149,11 +1149,11 @@
      主页
 ====================================================== -->
 <div id="page-home" class="page active">
-  <!-- 全屏视频背景 -->
-  <video id="home-video-bg" autoplay muted loop playsinline poster="">
+  <!-- 全屏视频背景（微信/iOS需要用户触摸才能播放，加poster静态封面兜底） -->
+  <video id="home-video-bg" autoplay muted loop playsinline webkit-playsinline x5-playsinline x5-video-player-type="h5" x5-video-player-fullscreen="false" x5-video-orientation="portraint" poster="" style="object-fit:cover;">
     <source src="b302c9894d9048244b6c0fc5a954d2a8.mp4" type="video/mp4">
   </video>
-  <!-- 视频加载失败时的静态背景 -->
+  <!-- 视频加载失败/微信屏蔽时的静态背景 -->
   <div id="home-video-fallback" style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg,#0d0315 0%,#1a0e2e 40%,#2a1040 70%,#0d0315 100%);z-index:0;display:none;"></div>
   <div class="home-overlay"></div>
   <div class="home-fog"></div>
@@ -1452,23 +1452,23 @@
 // 注意：解毒剂已移出格子牌，改为道具牌（3张），可通过5积分兑换或魔法草药抽取获得
 // 图片映射：基于逐张读取卡面文字确认（v6 最终修正版）
 var GRID_CARDS = [
-  { id:'donut',    name:'甜甜圈',   count:3, icon:'🍩', img:'新建文件夹/新建文件夹 (2)/2ECDB37B9BDC70BBC5D56DCA8D61EC77.jpg',
+  { id:'donut',    name:'甜甜圈',   count:3, icon:'🍩', img:'cards/grid_donut.png',
     effect:'score', points:3, desc:'+3 分', color:'#f0c060' },
-  { id:'energy',   name:'能量饮料', count:2, icon:'⚡', img:'新建文件夹/新建文件夹 (2)/08D21C33A0B9B3BCC5106F3E57243FFF.jpg',
+  { id:'energy',   name:'能量饮料', count:2, icon:'⚡', img:'cards/grid_energy.png',
     effect:'extra_flip', desc:'立即再翻1张牌！', color:'#60d0ff' },
-  { id:'apple',    name:'苹果',     count:8, icon:'🍎', img:'新建文件夹/新建文件夹 (2)/8EA2A9130C9256770E9D6E1039F0CECD(1).jpg',
+  { id:'apple',    name:'苹果',     count:8, icon:'🍎', img:'cards/grid_apple.png',
     effect:'score', points:1, desc:'+1 分', color:'#80ff80' },
-  { id:'poison',   name:'女巫的毒药',count:3, icon:'☠️', img:'新建文件夹/新建文件夹 (2)/9DA1BA0AAD014A45FC26009140C3F699.jpg',
+  { id:'poison',   name:'女巫的毒药',count:3, icon:'☠️', img:'cards/grid_poison.png',
     effect:'poison',     desc:'中毒！立即出局（解毒剂可解救）', color:'#ff4444', danger:true },
-  { id:'candy',    name:'糖果',     count:1, icon:'🍬', img:'新建文件夹/新建文件夹 (2)/36F97D7752A528A8EF3A61A1A2C3F95D.jpg',
+  { id:'candy',    name:'糖果',     count:1, icon:'🍬', img:'cards/grid_candy.png',
     effect:'score', points:5, desc:'+5 分！大奖！', color:'#ffcc00' },
-  { id:'pie',      name:'苹果派',   count:2, icon:'🥧', img:'新建文件夹/新建文件夹 (2)/447D2E179B15F91B87E911745E9DDFD3.jpg',
+  { id:'pie',      name:'苹果派',   count:2, icon:'🥧', img:'cards/grid_applepie.png',
     effect:'score', points:2, desc:'+2 分', color:'#f0c060' },
-  { id:'magnifier',name:'放大镜',   count:2, icon:'🔍', img:'新建文件夹/新建文件夹 (2)/2682370802385137E9DB99DE3AC99298.jpg',
+  { id:'magnifier',name:'放大镜',   count:2, icon:'🔍', img:'cards/grid_magnifier.png',
     effect:'peek',       desc:'偷看任意1张未翻的牌', color:'#80c0ff' },
-  { id:'cookie',   name:'曲奇饼干', count:2, icon:'🍪', img:'新建文件夹/新建文件夹 (2)/A5F7888D148A883C4871EA70A9967EBF.jpg',
+  { id:'cookie',   name:'曲奇饼干', count:2, icon:'🍪', img:'cards/grid_cookie.png',
     effect:'double_next',desc:'下一张牌分数翻倍！', color:'#ffdd80' },
-  { id:'herb',     name:'魔法草药', count:2, icon:'🌿', img:'新建文件夹/新建文件夹 (2)/A82045A5DF3B742AA96DDBF680E662A5.jpg',
+  { id:'herb',     name:'魔法草药', count:2, icon:'🌿', img:'cards/grid_herb.png',
     effect:'draw_tool',  desc:'从道具堆随机获得1张道具牌（可能是解毒剂！）', color:'#80ff80' },
 ];
 // 格子牌总数：3+2+8+3+1+2+2+2+2 = 25 ✓
@@ -1477,21 +1477,21 @@ var GRID_CARDS = [
 // 解毒剂在道具堆中，可通过5积分兑换或魔法草药抽取获得
 // 道具牌（每种3张）— 名称和效果来自卡面原文
 var TOOL_CARDS = [
-  { id:'antidote',   name:'解毒剂',   icon:'🧪', img:'新建文件夹/新建文件夹 (2)/B99B7C55D7D231FEE02BF07DDD7A6A35.jpg',
+  { id:'antidote',   name:'解毒剂',   icon:'🧪', img:'cards/tool_antidote.png',
     effect:'antidote', desc:'当你翻到"女巫的毒药"时，免出局一次' },
-  { id:'qiangyun',   name:'强运甘露', icon:'🍷', img:'新建文件夹/新建文件夹/A4CABD2919AE5FBC213F82C35F1CC50F.jpg',
+  { id:'qiangyun',   name:'强运甘露', icon:'🍷', img:'cards/tool_lucky.png',
     effect:'draw_2_pick_1', desc:'摸取道具牌堆顶2张牌，选择1张加入手牌，另1张放回牌堆底' },
-  { id:'miaoshou',   name:'妙手空空', icon:'✋', img:'新建文件夹/新建文件夹/C317118C4A91EB5AFAFF9330D3534AC7.jpg',
+  { id:'miaoshou',   name:'妙手空空', icon:'✋', img:'cards/tool_pickpocket.png',
     effect:'steal_3', desc:'获得一名其他玩家的3点积分' },
-  { id:'kuishi',     name:'窥视',     icon:'👁', img:'新建文件夹/新建文件夹/CF4990BA3CEC9858EE2DD29BBAA6F976.jpg',
+  { id:'kuishi',     name:'窥视',     icon:'👁', img:'cards/tool_peek.png',
     effect:'peek_3', desc:'查看3张食物牌' },
-  { id:'yixing',     name:'移形换影', icon:'👤', img:'新建文件夹/新建文件夹/1255E84889E33D3C1B8DCC65C62B3411.jpg',
+  { id:'yixing',     name:'移形换影', icon:'👤', img:'cards/tool_swap.png',
     effect:'swap_2', desc:'选择2张食物牌偷偷交换位置' },
-  { id:'liliang',    name:'力量药剂', icon:'💪', img:'新建文件夹/新建文件夹/B94E56FB3DC6B33182E23F0A0B33AD06.jpg',
+  { id:'liliang',    name:'力量药剂', icon:'💪', img:'cards/tool_power.png',
     effect:'force_flip', desc:'选择一名其他玩家，你来帮他翻开一张食物牌，效果由他承担' },
-  { id:'dianshi',    name:'点石成金', icon:'✨', img:'新建文件夹/新建文件夹/49AB268FEF3415CDFACCB6BB2731E588.jpg',
+  { id:'dianshi',    name:'点石成金', icon:'✨', img:'cards/tool_gold.png',
     effect:'score_7', desc:'立即获得7点积分' },
-  { id:'hushen',     name:'护身符',   icon:'🔖', img:'新建文件夹/新建文件夹/A9F229B815D7CF78E698568CD1BB5F7F.jpg',
+  { id:'hushen',     name:'护身符',   icon:'🔖', img:'cards/tool_amulet.png',
     effect:'protect', desc:'在你的下一个回合开始前，不会出局' },
 ];
 
@@ -1608,6 +1608,8 @@ var AVATAR_FILES = [
   nameInput.oninput = function(){
     CUSTOM_NAME = nameInput.value.trim();
     localStorage.setItem('witch_name', CUSTOM_NAME);
+    // 切换到该用户的独立积分
+    loadWalletForUser();
   };
   CUSTOM_NAME = nameInput.value.trim();
   localStorage.setItem('witch_name', CUSTOM_NAME);
@@ -1650,7 +1652,28 @@ function updateWalletDisplay(){
   var el2 = document.getElementById('game-wallet-display');
   if(el1) el1.textContent = G.wallet;
   if(el2) el2.textContent = G.wallet;
-  localStorage.setItem('witch_wallet', G.wallet);  // 刷新不丢失
+  saveWalletForUser();
+}
+
+// ---- 用户独立积分系统（按昵称存储） ----
+function getWalletKey(){
+  var name = (typeof CUSTOM_NAME !== 'undefined' && CUSTOM_NAME) ? CUSTOM_NAME : (localStorage.getItem('witch_name') || '');
+  if(!name){ return 'witch_wallet__guest'; }
+  return 'witch_wallet__' + name;
+}
+function saveWalletForUser(){
+  try{ localStorage.setItem(getWalletKey(), G.wallet); }catch(e){}
+}
+function loadWalletForUser(){
+  var key = getWalletKey();
+  var saved = localStorage.getItem(key);
+  if(saved !== null && !isNaN(parseInt(saved))){
+    G.wallet = parseInt(saved);
+  } else {
+    G.wallet = 10000; // 新用户初始10000
+    saveWalletForUser();
+  }
+  updateWalletDisplay();
 }
 
 function startGameFlow(){
@@ -1753,7 +1776,7 @@ window.addEventListener('message', function(event){
   
   // 自动加积分
   G.wallet += points;
-  try { localStorage.setItem('witch_wallet', G.wallet); } catch(e) {}
+  try { saveWalletForUser(); } catch(e) {}
   
   // 更新UI
   updateWalletDisplay();
@@ -2012,7 +2035,7 @@ var G = {
   forceFlipTarget: null, // 力量药剂目标
   pickCallback: null,
   gameOver: false,
-  wallet: parseInt(localStorage.getItem('witch_wallet')) || 10000,     // 钱包余额（刷新不丢失）
+  wallet: parseInt(localStorage.getItem('witch_wallet')) || 10000,     // 初始值，后续被 loadWalletForUser() 覆盖
   entryFee: 20,      // 入场费
   // 倒计时相关
   turnTimer: null,    // 计时器ID
@@ -3256,35 +3279,39 @@ function resetStats(){
 // 页面初始化：刷新后恢复上次积分/名字/头像
 // ============================================================
 (function pageInit(){
-  updateWalletDisplay();  // 显示上次保存的积分（默认10000）
+  // 先读取名字，再按用户名加载积分（用户独立积分系统）
+  // updateWalletDisplay() 会在 loadWalletForUser() 内被调用
+  // 此处先用默认值更新一次UI，防止空白
+  updateWalletDisplay();
 
-  // 视频自动播放fallback（移动端浏览器限制autoplay）
+  // ---- 视频播放：兼容微信/iOS/Android ----
   var video = document.getElementById('home-video-bg');
   var fallback = document.getElementById('home-video-fallback');
-  if(video){
-    // 尝试强制播放
-    var playPromise = video.play();
-    if(playPromise !== undefined){
-      playPromise.then(function(){
-        if(fallback) fallback.style.display = 'none';
-      }).catch(function(){
-        // autoplay被阻止，再次尝试
-        setTimeout(function(){
-          video.play().then(function(){
-            if(fallback) fallback.style.display = 'none';
-          }).catch(function(){
-            // 最终失败，显示静态背景
-            if(fallback) fallback.style.display = 'block';
-            video.style.display = 'none';
-          });
-        }, 500);
-      });
+
+  function tryPlay(){
+    if(!video) return;
+    var p = video.play();
+    if(p && typeof p.then === 'function'){
+      p.then(function(){ if(fallback) fallback.style.display='none'; })
+       .catch(function(){
+         // 第一次失败，等用户触摸后再播
+         if(fallback) fallback.style.display='block';
+         var once = function(){ video.play().then(function(){ fallback.style.display='none'; }).catch(function(){}); document.removeEventListener('touchstart',once); document.removeEventListener('click',once); };
+         document.addEventListener('touchstart',once,{once:true});
+         document.addEventListener('click',once,{once:true});
+       });
     }
-    // 视频加载失败时显示fallback
-    video.onerror = function(){
-      if(fallback) fallback.style.display = 'block';
-      video.style.display = 'none';
-    };
+  }
+
+  if(video){
+    // 微信内置浏览器：监听 WeixinJSBridgeReady 事件再播
+    if(typeof window.WeixinJSBridge !== 'undefined'){
+      window.WeixinJSBridge.invoke('getNetworkType',{},function(){ tryPlay(); });
+    } else {
+      document.addEventListener('WeixinJSBridgeReady',function(){ tryPlay(); },{once:true});
+      tryPlay(); // 同时直接尝试（非微信浏览器）
+    }
+    video.onerror = function(){ if(fallback){ fallback.style.display='block'; } video.style.display='none'; };
   }
 
   // 恢复自定义名字
@@ -3296,6 +3323,9 @@ function resetStats(){
     var selImg = document.querySelector('.avatar-select-img[data-file="'+CUSTOM_AVATAR_FILE+'"]');
     if(selImg) selImg.classList.add('selected');
   }
+
+  // 按当前用户名加载对应积分
+  loadWalletForUser();
 })();
 </script>
 <!-- 兑换码数据（由 payment_monitor.py 自动生成，请勿手动修改） -->
