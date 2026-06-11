@@ -46,14 +46,49 @@
     position: relative;
     overflow: hidden;
   }
-  /* 主页全屏视频背景 */
-  #home-video-bg {
+  /* 主页全屏CSS动画背景（替代视频，零加载时间） */
+  #home-css-bg {
     position: absolute;
-    top: 50%; left: 50%;
-    min-width: 100%; min-height: 100%;
-    transform: translate(-50%,-50%);
-    object-fit: cover;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(135deg, #0d0315 0%, #1a0828 25%, #0f1a30 50%, #1a0828 75%, #0d0315 100%);
+    background-size: 400% 400%;
+    animation: bgShift 12s ease infinite;
     z-index: 0;
+  }
+  #home-css-bg::before {
+    content: '';
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(ellipse 80% 60% at 30% 40%, rgba(120,40,180,0.25) 0%, transparent 70%),
+                radial-gradient(ellipse 60% 80% at 70% 60%, rgba(40,80,180,0.18) 0%, transparent 70%);
+    animation: glowPulse 6s ease-in-out infinite alternate;
+  }
+  #home-css-bg::after {
+    content: '';
+    position: absolute; top: 0; left: 0; width: 200%; height: 200%;
+    background-image:
+      radial-gradient(circle 1px at 10% 20%, rgba(255,220,255,0.7) 0%, transparent 100%),
+      radial-gradient(circle 1px at 30% 60%, rgba(220,200,255,0.5) 0%, transparent 100%),
+      radial-gradient(circle 1px at 55% 15%, rgba(255,255,220,0.6) 0%, transparent 100%),
+      radial-gradient(circle 1px at 75% 40%, rgba(200,220,255,0.7) 0%, transparent 100%),
+      radial-gradient(circle 1px at 90% 70%, rgba(255,200,255,0.5) 0%, transparent 100%),
+      radial-gradient(circle 1px at 20% 85%, rgba(220,255,220,0.6) 0%, transparent 100%),
+      radial-gradient(circle 1px at 65% 80%, rgba(255,240,200,0.5) 0%, transparent 100%),
+      radial-gradient(circle 1px at 45% 45%, rgba(255,255,255,0.4) 0%, transparent 100%);
+    animation: starsTwinkle 8s linear infinite;
+  }
+  @keyframes bgShift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  @keyframes glowPulse {
+    0%   { opacity: 0.6; }
+    100% { opacity: 1; }
+  }
+  @keyframes starsTwinkle {
+    0%   { transform: translate(0,0); opacity: 0.8; }
+    50%  { opacity: 0.4; }
+    100% { transform: translate(-50px,-30px); opacity: 0.8; }
   }
   /* 视频上的半透明遮罩，确保文字可读 */
   .home-overlay {
@@ -1149,12 +1184,10 @@
      主页
 ====================================================== -->
 <div id="page-home" class="page active">
-  <!-- 全屏视频背景（微信/iOS需要用户触摸才能播放，加poster静态封面兜底） -->
-  <video id="home-video-bg" autoplay muted loop playsinline webkit-playsinline x5-playsinline x5-video-player-type="h5" x5-video-player-fullscreen="false" x5-video-orientation="portraint" poster="" style="object-fit:cover;">
-    <source src="b302c9894d9048244b6c0fc5a954d2a8.mp4" type="video/mp4">
-  </video>
-  <!-- 视频加载失败/微信屏蔽时的静态背景 -->
-  <div id="home-video-fallback" style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg,#0d0315 0%,#1a0e2e 40%,#2a1040 70%,#0d0315 100%);z-index:0;display:none;"></div>
+  <!-- 全屏CSS动画背景（无需加载视频，秒显示） -->
+  <div id="home-css-bg"></div>
+  <!-- 覆盖层，保留原有结构 -->
+  <div id="home-video-fallback" style="display:none;"></div>
   <div class="home-overlay"></div>
   <div class="home-fog"></div>
   <div class="moon"></div>
@@ -1452,23 +1485,23 @@
 // 注意：解毒剂已移出格子牌，改为道具牌（3张），可通过5积分兑换或魔法草药抽取获得
 // 图片映射：基于逐张读取卡面文字确认（v6 最终修正版）
 var GRID_CARDS = [
-  { id:'donut',    name:'甜甜圈',   count:3, icon:'🍩', img:'cards/grid_donut.png',
+  { id:'donut',    name:'甜甜圈',   count:3, icon:'🍩', img:'cards/grid_donut.jpg',
     effect:'score', points:3, desc:'+3 分', color:'#f0c060' },
-  { id:'energy',   name:'能量饮料', count:2, icon:'⚡', img:'cards/grid_energy.png',
+  { id:'energy',   name:'能量饮料', count:2, icon:'⚡', img:'cards/grid_energy.jpg',
     effect:'extra_flip', desc:'立即再翻1张牌！', color:'#60d0ff' },
-  { id:'apple',    name:'苹果',     count:8, icon:'🍎', img:'cards/grid_apple.png',
+  { id:'apple',    name:'苹果',     count:8, icon:'🍎', img:'cards/grid_apple.jpg',
     effect:'score', points:1, desc:'+1 分', color:'#80ff80' },
-  { id:'poison',   name:'女巫的毒药',count:3, icon:'☠️', img:'cards/grid_poison.png',
+  { id:'poison',   name:'女巫的毒药',count:3, icon:'☠️', img:'cards/grid_poison.jpg',
     effect:'poison',     desc:'中毒！立即出局（解毒剂可解救）', color:'#ff4444', danger:true },
-  { id:'candy',    name:'糖果',     count:1, icon:'🍬', img:'cards/grid_candy.png',
+  { id:'candy',    name:'糖果',     count:1, icon:'🍬', img:'cards/grid_candy.jpg',
     effect:'score', points:5, desc:'+5 分！大奖！', color:'#ffcc00' },
-  { id:'pie',      name:'苹果派',   count:2, icon:'🥧', img:'cards/grid_applepie.png',
+  { id:'pie',      name:'苹果派',   count:2, icon:'🥧', img:'cards/grid_applepie.jpg',
     effect:'score', points:2, desc:'+2 分', color:'#f0c060' },
-  { id:'magnifier',name:'放大镜',   count:2, icon:'🔍', img:'cards/grid_magnifier.png',
+  { id:'magnifier',name:'放大镜',   count:2, icon:'🔍', img:'cards/grid_magnifier.jpg',
     effect:'peek',       desc:'偷看任意1张未翻的牌', color:'#80c0ff' },
-  { id:'cookie',   name:'曲奇饼干', count:2, icon:'🍪', img:'cards/grid_cookie.png',
+  { id:'cookie',   name:'曲奇饼干', count:2, icon:'🍪', img:'cards/grid_cookie.jpg',
     effect:'double_next',desc:'下一张牌分数翻倍！', color:'#ffdd80' },
-  { id:'herb',     name:'魔法草药', count:2, icon:'🌿', img:'cards/grid_herb.png',
+  { id:'herb',     name:'魔法草药', count:2, icon:'🌿', img:'cards/grid_herb.jpg',
     effect:'draw_tool',  desc:'从道具堆随机获得1张道具牌（可能是解毒剂！）', color:'#80ff80' },
 ];
 // 格子牌总数：3+2+8+3+1+2+2+2+2 = 25 ✓
@@ -1477,21 +1510,21 @@ var GRID_CARDS = [
 // 解毒剂在道具堆中，可通过5积分兑换或魔法草药抽取获得
 // 道具牌（每种3张）— 名称和效果来自卡面原文
 var TOOL_CARDS = [
-  { id:'antidote',   name:'解毒剂',   icon:'🧪', img:'cards/tool_antidote.png',
+  { id:'antidote',   name:'解毒剂',   icon:'🧪', img:'cards/tool_antidote.jpg',
     effect:'antidote', desc:'当你翻到"女巫的毒药"时，免出局一次' },
-  { id:'qiangyun',   name:'强运甘露', icon:'🍷', img:'cards/tool_lucky.png',
+  { id:'qiangyun',   name:'强运甘露', icon:'🍷', img:'cards/tool_lucky.jpg',
     effect:'draw_2_pick_1', desc:'摸取道具牌堆顶2张牌，选择1张加入手牌，另1张放回牌堆底' },
-  { id:'miaoshou',   name:'妙手空空', icon:'✋', img:'cards/tool_pickpocket.png',
+  { id:'miaoshou',   name:'妙手空空', icon:'✋', img:'cards/tool_pickpocket.jpg',
     effect:'steal_3', desc:'获得一名其他玩家的3点积分' },
-  { id:'kuishi',     name:'窥视',     icon:'👁', img:'cards/tool_peek.png',
+  { id:'kuishi',     name:'窥视',     icon:'👁', img:'cards/tool_peek.jpg',
     effect:'peek_3', desc:'查看3张食物牌' },
-  { id:'yixing',     name:'移形换影', icon:'👤', img:'cards/tool_swap.png',
+  { id:'yixing',     name:'移形换影', icon:'👤', img:'cards/tool_swap.jpg',
     effect:'swap_2', desc:'选择2张食物牌偷偷交换位置' },
-  { id:'liliang',    name:'力量药剂', icon:'💪', img:'cards/tool_power.png',
+  { id:'liliang',    name:'力量药剂', icon:'💪', img:'cards/tool_power.jpg',
     effect:'force_flip', desc:'选择一名其他玩家，你来帮他翻开一张食物牌，效果由他承担' },
-  { id:'dianshi',    name:'点石成金', icon:'✨', img:'cards/tool_gold.png',
+  { id:'dianshi',    name:'点石成金', icon:'✨', img:'cards/tool_gold.jpg',
     effect:'score_7', desc:'立即获得7点积分' },
-  { id:'hushen',     name:'护身符',   icon:'🔖', img:'cards/tool_amulet.png',
+  { id:'hushen',     name:'护身符',   icon:'🔖', img:'cards/tool_amulet.jpg',
     effect:'protect', desc:'在你的下一个回合开始前，不会出局' },
 ];
 
@@ -3284,35 +3317,7 @@ function resetStats(){
   // 此处先用默认值更新一次UI，防止空白
   updateWalletDisplay();
 
-  // ---- 视频播放：兼容微信/iOS/Android ----
-  var video = document.getElementById('home-video-bg');
-  var fallback = document.getElementById('home-video-fallback');
-
-  function tryPlay(){
-    if(!video) return;
-    var p = video.play();
-    if(p && typeof p.then === 'function'){
-      p.then(function(){ if(fallback) fallback.style.display='none'; })
-       .catch(function(){
-         // 第一次失败，等用户触摸后再播
-         if(fallback) fallback.style.display='block';
-         var once = function(){ video.play().then(function(){ fallback.style.display='none'; }).catch(function(){}); document.removeEventListener('touchstart',once); document.removeEventListener('click',once); };
-         document.addEventListener('touchstart',once,{once:true});
-         document.addEventListener('click',once,{once:true});
-       });
-    }
-  }
-
-  if(video){
-    // 微信内置浏览器：监听 WeixinJSBridgeReady 事件再播
-    if(typeof window.WeixinJSBridge !== 'undefined'){
-      window.WeixinJSBridge.invoke('getNetworkType',{},function(){ tryPlay(); });
-    } else {
-      document.addEventListener('WeixinJSBridgeReady',function(){ tryPlay(); },{once:true});
-      tryPlay(); // 同时直接尝试（非微信浏览器）
-    }
-    video.onerror = function(){ if(fallback){ fallback.style.display='block'; } video.style.display='none'; };
-  }
+  // ---- 视频已替换为CSS动画背景，无需播放逻辑 ----
 
   // 恢复自定义名字
   var nameInput = document.getElementById('custom-name');
