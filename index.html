@@ -46,115 +46,269 @@
     position: relative;
     overflow: hidden;
   }
-  /* 主页全屏CSS动画背景（替代视频，零加载时间） */
+  /* ============================================================
+     主页炫酷CSS动画背景（多层特效，零加载时间）
+  ============================================================ */
   #home-css-bg {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(135deg, #0d0315 0%, #1a0828 25%, #0f1a30 50%, #1a0828 75%, #0d0315 100%);
+    background: linear-gradient(160deg,#040010 0%,#0d0320 15%,#150830 30%,#0a1025 50%,#1a0628 70%,#0d0318 100%);
     background-size: 400% 400%;
-    animation: bgShift 12s ease infinite;
+    animation: bgShift 18s ease infinite;
     z-index: 0;
   }
+  /* 魔法光环层 */
   #home-css-bg::before {
     content: '';
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: radial-gradient(ellipse 80% 60% at 30% 40%, rgba(120,40,180,0.25) 0%, transparent 70%),
-                radial-gradient(ellipse 60% 80% at 70% 60%, rgba(40,80,180,0.18) 0%, transparent 70%);
-    animation: glowPulse 6s ease-in-out infinite alternate;
+    background: 
+      radial-gradient(ellipse 70% 50% at 25% 35%, rgba(140,30,200,0.3) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 60% at 75% 55%, rgba(30,100,200,0.2) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 50% 70%, rgba(20,180,100,0.15) 0%, transparent 60%),
+      radial-gradient(circle 200px at 80% 25%, rgba(248,217,122,0.1) 0%, transparent 100%);
+    animation: glowPulse 8s ease-in-out infinite alternate;
   }
+  /* 星光层 - 双层星星不同速度产生视差 */
   #home-css-bg::after {
     content: '';
-    position: absolute; top: 0; left: 0; width: 200%; height: 200%;
+    position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
     background-image:
-      radial-gradient(circle 1px at 10% 20%, rgba(255,220,255,0.7) 0%, transparent 100%),
-      radial-gradient(circle 1px at 30% 60%, rgba(220,200,255,0.5) 0%, transparent 100%),
-      radial-gradient(circle 1px at 55% 15%, rgba(255,255,220,0.6) 0%, transparent 100%),
-      radial-gradient(circle 1px at 75% 40%, rgba(200,220,255,0.7) 0%, transparent 100%),
-      radial-gradient(circle 1px at 90% 70%, rgba(255,200,255,0.5) 0%, transparent 100%),
-      radial-gradient(circle 1px at 20% 85%, rgba(220,255,220,0.6) 0%, transparent 100%),
-      radial-gradient(circle 1px at 65% 80%, rgba(255,240,200,0.5) 0%, transparent 100%),
-      radial-gradient(circle 1px at 45% 45%, rgba(255,255,255,0.4) 0%, transparent 100%);
-    animation: starsTwinkle 8s linear infinite;
+      /* 大星（亮） */
+      radial-gradient(2px 2px at 5% 10%,  rgba(255,255,255,0.9) 0%, transparent 100%),
+      radial-gradient(2px 2px at 15% 25%, rgba(255,240,200,0.85) 0%, transparent 100%),
+      radial-gradient(3px 3px at 25% 8%,  rgba(200,220,255,0.9) 0%, transparent 100%),
+      radial-gradient(2px 2px at 35% 40%, rgba(255,255,240,0.8) 0%, transparent 100%),
+      radial-gradient(3px 3px at 50% 15%, rgba(240,200,255,0.85) 0%, transparent 100%),
+      radial-gradient(2px 2px at 60% 35%, rgba(255,255,255,0.9) 0%, transparent 100%),
+      radial-gradient(3px 3px at 70% 10%, rgba(220,255,220,0.8) 0%, transparent 100%),
+      radial-gradient(2px 2px at 80% 30%, rgba(255,220,255,0.85) 0%, transparent 100%),
+      radial-gradient(3px 3px at 90% 12%, rgba(200,240,255,0.9) 0%, transparent 100%),
+      radial-gradient(2px 2px at 12% 55%, rgba(255,255,220,0.8) 0%, transparent 100%),
+      radial-gradient(3px 3px at 40% 50%, rgba(240,200,255,0.85) 0%, transparent 100%),
+      radial-gradient(2px 2px at 65% 55%, rgba(255,255,255,0.9) 0%, transparent 100%),
+      radial-gradient(3px 3px at 85% 60%, rgba(200,255,220,0.8) 0%, transparent 100%),
+      /* 小星（暗） */
+      radial-gradient(1px 1px at 8% 18%,  rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 18% 35%, rgba(200,200,255,0.45) 0%, transparent 100%),
+      radial-gradient(1px 1px at 28% 50%, rgba(255,255,200,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 42% 22%, rgba(220,200,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 55% 48%, rgba(255,255,255,0.45) 0%, transparent 100%),
+      radial-gradient(1px 1px at 68% 20%, rgba(200,255,200,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 78% 52%, rgba(255,200,255,0.45) 0%, transparent 100%),
+      radial-gradient(1px 1px at 92% 38%, rgba(200,220,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 22% 70%, rgba(255,255,220,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 48% 68%, rgba(220,255,220,0.45) 0%, transparent 100%),
+      radial-gradient(1px 1px at 72% 72%, rgba(255,220,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 88% 75%, rgba(255,255,255,0.5) 0%, transparent 100%);
+    animation: starsParallax 15s linear infinite;
   }
   @keyframes bgShift {
     0%   { background-position: 0% 50%; }
+    25%  { background-position: 50% 0%; }
     50%  { background-position: 100% 50%; }
+    75%  { background-position: 50% 100%; }
     100% { background-position: 0% 50%; }
   }
   @keyframes glowPulse {
-    0%   { opacity: 0.6; }
-    100% { opacity: 1; }
+    0%   { opacity: 0.5; transform: scale(1); }
+    50%  { opacity: 0.9; transform: scale(1.03); }
+    100% { opacity: 0.5; transform: scale(1); }
   }
-  @keyframes starsTwinkle {
-    0%   { transform: translate(0,0); opacity: 0.8; }
-    50%  { opacity: 0.4; }
-    100% { transform: translate(-50px,-30px); opacity: 0.8; }
+  @keyframes starsParallax {
+    0%   { transform: translate(0,0) rotate(0deg); opacity: 0.7; }
+    50%  { opacity: 1; }
+    100% { transform: translate(-60px,-40px) rotate(1deg); opacity: 0.7; }
   }
-  /* 视频上的半透明遮罩，确保文字可读 */
+
+  /* 魔法粒子容器（JS注入） */
+  .magic-particles-layer {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 4; overflow: hidden;
+  }
+  .magic-particle {
+    position: absolute; border-radius: 50%;
+    animation: particleFloat var(--dur) ease-in-out infinite;
+    animation-delay: var(--delay);
+    opacity: 0;
+  }
+  @keyframes particleFloat {
+    0%   { transform: translate(0,0) scale(0); opacity: 0; }
+    10%  { opacity: var(--alpha); }
+    50%  { transform: translate(var(--dx), var(--dy)) scale(1); opacity: var(--alpha); }
+    90%  { opacity: 0; }
+    100% { transform: translate(var(--dx2), var(--dy2)) scale(0.2); opacity: 0; }
+  }
+
+  /* 星光粒子（纯CSS，不需要JS也能动） */
+  .star-particle {
+    position: absolute; border-radius: 50%; background: #f8d97a;
+    box-shadow: 0 0 6px 2px rgba(248,217,122,0.6);
+    pointer-events: none; z-index: 4;
+    animation: starFloat 6s ease-in-out infinite;
+  }
+  .star-particle:nth-child(1) { width:3px;height:3px;top:8%;left:12%;animation-delay:0s;animation-duration:6s; }
+  .star-particle:nth-child(2) { width:4px;height:4px;top:15%;left:75%;animation-delay:1.2s;animation-duration:7s; }
+  .star-particle:nth-child(3) { width:2px;height:2px;top:25%;left:45%;animation-delay:2.4s;animation-duration:5.5s; }
+  .star-particle:nth-child(4) { width:5px;height:5px;top:35%;left:22%;animation-delay:0.6s;animation-duration:8s; }
+  .star-particle:nth-child(5) { width:3px;height:3px;top:45%;left:82%;animation-delay:3s;animation-duration:6.5s; }
+  .star-particle:nth-child(6) { width:2px;height:2px;top:55%;left:35%;animation-delay:1.8s;animation-duration:5s; }
+  .star-particle:nth-child(7) { width:4px;height:4px;top:65%;left:65%;animation-delay:0.3s;animation-duration:7.5s; }
+  .star-particle:nth-child(8) { width:3px;height:3px;top:75%;left:18%;animation-delay:2.1s;animation-duration:6s; }
+  .star-particle:nth-child(9) { width:2px;height:2px;top:85%;left:55%;animation-delay:3.6s;animation-duration:5.5s; }
+  .star-particle:nth-child(10){ width:4px;height:4px;top:5%;left:52%;animation-delay:1s;animation-duration:8s; }
+  @keyframes starFloat {
+    0%   { transform: translate(0,0) scale(1); opacity: 0.3; }
+    25%  { opacity: 1; transform: translate(10px,-20px) scale(1.5); }
+    50%  { transform: translate(-5px,-40px) scale(0.8); opacity: 0.6; }
+    75%  { opacity: 1; transform: translate(15px,-15px) scale(1.3); }
+    100% { transform: translate(0,0) scale(1); opacity: 0.3; }
+  }
+
+  /* 半透明遮罩 */
   .home-overlay {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.45);
+    background: rgba(0,0,0,0.35);
     z-index: 1;
     pointer-events: none;
   }
+
+  /* 魔法雾气 */
   .home-fog {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: repeating-linear-gradient(0deg,
-      rgba(30,90,30,0.03) 0px, rgba(30,90,30,0.03) 1px, transparent 1px, transparent 40px),
-      repeating-linear-gradient(90deg,
-      rgba(30,90,30,0.03) 0px, rgba(30,90,30,0.03) 1px, transparent 1px, transparent 40px);
-    animation: fogMove 8s linear infinite;
+    background:
+      /* 紫色魔法雾 */
+      radial-gradient(ellipse 60% 30% at 30% 60%, rgba(100,20,180,0.06) 0%, transparent 100%),
+      radial-gradient(ellipse 40% 25% at 70% 40%, rgba(20,80,160,0.05) 0%, transparent 100%),
+      radial-gradient(ellipse 50% 20% at 50% 80%, rgba(20,140,80,0.04) 0%, transparent 100%),
+      repeating-linear-gradient(0deg, rgba(40,20,60,0.03) 0px, rgba(40,20,60,0.03) 2px, transparent 2px, transparent 50px),
+      repeating-linear-gradient(90deg, rgba(20,40,60,0.03) 0px, rgba(20,40,60,0.03) 2px, transparent 2px, transparent 50px);
+    animation: fogMove 12s ease-in-out infinite alternate;
     pointer-events: none;
     z-index: 2;
   }
-  @keyframes fogMove { 0%{transform:translate(0,0)} 100%{transform:translate(40px,40px)} }
+  @keyframes fogMove { 
+    0%{transform:translate(0,0) scale(1); opacity:0.8;} 
+    50%{transform:translate(30px,20px) scale(1.02); opacity:1;}
+    100%{transform:translate(-20px,-10px) scale(0.98); opacity:0.8;}
+  }
+
+  /* 月亮 - 增强版带光晕环 */
   .moon {
-    position: absolute; top: 60px; right: 120px;
+    position: absolute; top: 50px; right: 100px;
     width: 90px; height: 90px; border-radius: 50%;
-    background: radial-gradient(circle, #fffde0, #f8d97a 60%, #c8a020);
-    box-shadow: 0 0 40px 20px rgba(248,217,122,0.35), 0 0 80px 40px rgba(248,217,122,0.1);
-    animation: moonGlow 3s ease-in-out infinite alternate;
+    background: radial-gradient(circle at 35% 35%, #fffde0, #f8d97a 50%, #d4a830 80%, #a07820);
+    box-shadow: 
+      0 0 30px 15px rgba(248,217,122,0.4),
+      0 0 80px 30px rgba(248,217,122,0.15),
+      0 0 150px 50px rgba(248,217,122,0.05);
     z-index: 3;
+    animation: moonGlow 4s ease-in-out infinite alternate;
+  }
+  /* 月亮光晕环 */
+  .moon::before {
+    content: '';
+    position: absolute; top: -15px; left: -15px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    border: 1px solid rgba(248,217,122,0.2);
+    animation: moonRing 5s ease-in-out infinite alternate;
+  }
+  .moon::after {
+    content: '✦';
+    position: absolute; top: -18px; right: 10px;
+    font-size: 14px; color: #f8d97a;
+    animation: moonSpark 2s ease-in-out infinite;
   }
   @keyframes moonGlow {
-    0% { box-shadow: 0 0 40px 20px rgba(248,217,122,0.35), 0 0 80px 40px rgba(248,217,122,0.1); }
-    100% { box-shadow: 0 0 60px 30px rgba(248,217,122,0.5), 0 0 120px 60px rgba(248,217,122,0.2); }
+    0% { box-shadow: 0 0 30px 15px rgba(248,217,122,0.4), 0 0 80px 30px rgba(248,217,122,0.15), 0 0 150px 50px rgba(248,217,122,0.05); }
+    100% { box-shadow: 0 0 50px 25px rgba(248,217,122,0.55), 0 0 120px 45px rgba(248,217,122,0.25), 0 0 200px 70px rgba(248,217,122,0.1); }
   }
+  @keyframes moonRing {
+    0% { transform: scale(1); opacity: 0.15; }
+    100% { transform: scale(1.15); opacity: 0.35; }
+  }
+  @keyframes moonSpark {
+    0%,100% { opacity: 0; transform: translate(0,0) scale(0.5); }
+    50% { opacity: 1; transform: translate(5px,-5px) scale(1); }
+  }
+
+  /* 蜘蛛 - 增强版带蛛丝 */
   .witch-spider { z-index: 3; }
+  .spider-web {
+    position: absolute; pointer-events: none; z-index: 3;
+  }
+
+  /* 标题 */
   .home-title {
     position: relative; z-index: 10;
     font-size: 64px;
     color: #f8d97a;
-    text-shadow: 0 0 20px #f8d97a, 0 0 40px #b91372, 0 0 60px #6b0f1a;
+    text-shadow: 0 0 20px #f8d97a, 0 0 40px #b91372, 0 0 60px #6b0f1a, 0 0 100px rgba(185,19,114,0.3);
     letter-spacing: 8px;
     margin-bottom: 16px;
-    animation: titlePulse 2.5s ease-in-out infinite alternate;
+    animation: titlePulse 3s ease-in-out infinite alternate;
   }
   @keyframes titlePulse {
-    0% { text-shadow: 0 0 20px #f8d97a, 0 0 40px #b91372; }
-    100% { text-shadow: 0 0 40px #fff, 0 0 80px #f8d97a, 0 0 120px #b91372; }
+    0% { text-shadow: 0 0 20px #f8d97a, 0 0 40px #b91372, 0 0 60px #6b0f1a; transform: scale(1); }
+    100% { text-shadow: 0 0 50px #fff, 0 0 100px #f8d97a, 0 0 150px #b91372, 0 0 200px rgba(120,20,80,0.5); transform: scale(1.02); }
   }
   .home-subtitle {
     position: relative; z-index: 10;
-    font-size: 18px; color: #a080c0; letter-spacing: 6px; margin-bottom: 60px;
-    animation: subtitleFade 2s ease-in-out infinite alternate;
+    font-size: 18px; color: #b090d0; letter-spacing: 6px; margin-bottom: 60px;
+    animation: subtitleFade 2.5s ease-in-out infinite alternate;
+    text-shadow: 0 0 10px rgba(160,100,200,0.4);
   }
-  @keyframes subtitleFade { 0%{opacity:0.5} 100%{opacity:1} }
+  @keyframes subtitleFade { 0%{opacity:0.4; letter-spacing:4px;} 100%{opacity:1; letter-spacing:8px;} }
+
+  /* 坩埚 - 增强版带气泡 */
   .home-cauldron {
     position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 10;
-    font-size: 80px; -webkit-filter: drop-shadow(0 0 20px rgba(100,200,100,0.6)); filter: drop-shadow(0 0 20px rgba(100,200,100,0.6));
+    font-size: 80px; 
+    filter: drop-shadow(0 0 20px rgba(100,200,100,0.6)) drop-shadow(0 0 40px rgba(100,200,100,0.3));
     animation: cauldronBubble 1.5s ease-in-out infinite alternate;
+    cursor: default;
   }
   @keyframes cauldronBubble { 0%{transform:translateX(-50%) scale(1)} 100%{transform:translateX(-50%) scale(1.05) translateY(-5px)} }
+  /* 坩埚气泡 */
+  .cauldron-bubble {
+    position: absolute; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(100,255,150,0.8), rgba(20,180,80,0.4));
+    box-shadow: 0 0 8px rgba(100,255,150,0.5);
+    pointer-events: none; z-index: 11;
+    animation: bubbleRise var(--bubdur) ease-out infinite;
+    animation-delay: var(--bubdelay);
+  }
+  @keyframes bubbleRise {
+    0% { transform: translateY(0) scale(0.3); opacity: 0.8; }
+    50% { opacity: 0.6; }
+    100% { transform: translateY(-120px) scale(1.2); opacity: 0; }
+  }
+
+  /* 魔法符文 */
+  .witch-rune {
+    position: absolute; pointer-events: none; z-index: 3;
+    font-size: 28px; color: rgba(200,160,255,0.3);
+    text-shadow: 0 0 15px rgba(160,100,220,0.5);
+    animation: runeGlow 3s ease-in-out infinite;
+  }
+  .witch-rune:nth-child(1) { top: 15%; left: 5%; animation-delay: 0s; }
+  .witch-rune:nth-child(2) { top: 12%; right: 8%; animation-delay: 1s; }
+  .witch-rune:nth-child(3) { bottom: 20%; left: 8%; animation-delay: 2s; }
+  .witch-rune:nth-child(4) { bottom: 18%; right: 5%; animation-delay: 0.5s; }
+  @keyframes runeGlow {
+    0%,100% { opacity: 0.15; transform: scale(0.9) rotate(-5deg); }
+    50% { opacity: 0.5; transform: scale(1.1) rotate(5deg); }
+  }
 
   .home-btn-area { position: relative; z-index: 10; }
   .witch-spider {
-    position: absolute; top: 200px; left: 80px;
-    font-size: 36px; animation: spiderSway 3s ease-in-out infinite alternate;
+    position: absolute; top: 180px; left: 60px;
+    font-size: 36px; animation: spiderSway 4s ease-in-out infinite alternate;
     transform-origin: top center;
+    filter: drop-shadow(0 0 8px rgba(100,0,150,0.5));
   }
-  @keyframes spiderSway { 0%{transform:rotate(-10deg)} 100%{transform:rotate(10deg)} }
+  @keyframes spiderSway { 0%{transform:rotate(-12deg)} 100%{transform:rotate(12deg)} }
 
   /* ============================================================
      规则页
@@ -920,9 +1074,15 @@
       margin-bottom: 20px; padding: 0 10px;
       text-align: center;
     }
-    .moon { top: 20px; right: 20px; width: 50px; height: 50px; }
-    .witch-spider { top: 80px; left: 10px; font-size: 24px; }
-    .home-cauldron { bottom: 30px; font-size: 50px; }
+    .moon { top: 15px; right: 15px; width: 50px; height: 50px; }
+    .moon::before { top: -8px; left: -8px; width: 66px; height: 66px; }
+    .moon::after { top: -10px; right: 5px; font-size: 10px; }
+    .witch-spider { top: 60px; left: 5px; font-size: 22px; }
+    .home-cauldron { bottom: 20px; font-size: 45px; }
+    .witch-rune { font-size: 18px; }
+    .star-particle { display: none; }
+    .cauldron-bubble { display: none; }
+    .spider-web { display: none; }
 
     /* 钱包栏 */
     .wallet-bar {
@@ -1184,13 +1344,26 @@
      主页
 ====================================================== -->
 <div id="page-home" class="page active">
-  <!-- 全屏CSS动画背景（无需加载视频，秒显示） -->
+  <!-- 多层CSS动画背景 -->
   <div id="home-css-bg"></div>
-  <!-- 覆盖层，保留原有结构 -->
-  <div id="home-video-fallback" style="display:none;"></div>
+  <!-- 纯CSS星光粒子 -->
+  <span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span>
+  <!-- JS魔法粒子层 -->
+  <div class="magic-particles-layer" id="magic-particles"></div>
+  <!-- 魔法符文 -->
+  <span class="witch-rune">⛧</span><span class="witch-rune">☽</span><span class="witch-rune">☿</span><span class="witch-rune">⛤</span>
   <div class="home-overlay"></div>
   <div class="home-fog"></div>
   <div class="moon"></div>
+  <!-- 蜘蛛网 -->
+  <svg class="spider-web" style="position:absolute;top:170px;left:40px;width:120px;height:100px;z-index:3;pointer-events:none;" viewBox="0 0 120 100">
+    <line x1="60" y1="0" x2="40" y2="100" stroke="rgba(200,180,220,0.15)" stroke-width="0.8"/>
+    <line x1="60" y1="0" x2="80" y2="100" stroke="rgba(200,180,220,0.15)" stroke-width="0.8"/>
+    <line x1="60" y1="0" x2="60" y2="100" stroke="rgba(200,180,220,0.1)" stroke-width="0.5"/>
+    <path d="M40 100 Q55 60 80 100" fill="none" stroke="rgba(200,180,220,0.2)" stroke-width="0.6"/>
+    <path d="M40 70 Q60 55 80 70" fill="none" stroke="rgba(200,180,220,0.15)" stroke-width="0.5"/>
+    <path d="M40 40 Q60 30 80 40" fill="none" stroke="rgba(200,180,220,0.1)" stroke-width="0.4"/>
+  </svg>
   <div class="witch-spider">🕷</div>
   <h1 class="home-title">女巫的毒药</h1>
   <p class="home-subtitle">一场命运的赌局·谁将饮下那杯毒酒</p>
@@ -3331,6 +3504,95 @@ function resetStats(){
 
   // 按当前用户名加载对应积分
   loadWalletForUser();
+})();
+
+// ============================================================
+// 主页炫酷粒子系统（魔法光点 + 坩埚气泡）
+// ============================================================
+(function homeFX(){
+  var container = document.getElementById('magic-particles');
+  if(!container) return;
+
+  // 颜色调色板：金/紫/青/白
+  var palette = [
+    '#f8d97a','#e0b0ff','#00ffcc','#ff6ec7','#ffdd44','#aa88ff','#66ffaa','#ffaacc'
+  ];
+
+  // 创建魔法光点粒子
+  function spawnParticle(){
+    var dot = document.createElement('div');
+    dot.className = 'magic-particle';
+    var size = 2 + Math.random() * 5;
+    var color = palette[Math.floor(Math.random() * palette.length)];
+    var left = Math.random() * 100;
+    var top = Math.random() * 100;
+    var dx = (Math.random() - 0.5) * 200;
+    var dy = -(40 + Math.random() * 120); // 向上飘
+    var dx2 = dx + (Math.random() - 0.5) * 100;
+    var dy2 = dy - 50 - Math.random() * 100;
+    var dur = 4 + Math.random() * 8;
+    var delay = Math.random() * 3;
+    var alpha = 0.4 + Math.random() * 0.6;
+
+    dot.style.cssText = [
+      'width:'+size+'px','height:'+size+'px',
+      'left:'+left+'%','top:'+top+'%',
+      'background:'+color,
+      'box-shadow: 0 0 '+ (size*3) +'px '+ (size) +'px '+color,
+      '--dx:'+dx+'px','--dy:'+dy+'px',
+      '--dx2:'+dx2+'px','--dy2:'+dy2+'px',
+      '--dur:'+dur+'s','--delay: -'+delay+'s',
+      '--alpha:'+alpha
+    ].join(';');
+
+    container.appendChild(dot);
+    // 动画结束后移除
+    setTimeout(function(){ if(dot.parentNode) dot.parentNode.removeChild(dot); }, (dur + delay) * 1000 + 500);
+  }
+
+  // 持续生成粒子
+  setInterval(function(){
+    if(document.getElementById('page-home').classList.contains('active')){
+      spawnParticle();
+      // 偶尔多生成一两个
+      if(Math.random() < 0.3) spawnParticle();
+    }
+  }, 400);
+
+  // 初始预生成一批
+  for(var i=0; i<15; i++){ spawnParticle(); }
+
+  // ---- 坩埚气泡系统 ----
+  (function cauldronBubbles(){
+    var cauldron = document.querySelector('.home-cauldron');
+    if(!cauldron) return;
+
+    function spawnBubble(){
+      var bub = document.createElement('div');
+      bub.className = 'cauldron-bubble';
+      var size = 6 + Math.random() * 14;
+      var dur = 1.5 + Math.random() * 2;
+      var delay = Math.random() * 2;
+      bub.style.cssText = [
+        'width:'+size+'px','height:'+size+'px',
+        'bottom:85px',
+        'left:'+(47 + Math.random()*6)+'%',
+        '--bubdur:'+dur+'s',
+        '--bubdelay:-'+delay+'s'
+      ].join(';');
+      document.getElementById('page-home').appendChild(bub);
+      setTimeout(function(){ if(bub.parentNode) bub.parentNode.removeChild(bub); }, (dur + delay) * 1000 + 500);
+    }
+
+    setInterval(function(){
+      if(document.getElementById('page-home').classList.contains('active')){
+        spawnBubble();
+        if(Math.random() < 0.4) spawnBubble();
+      }
+    }, 600);
+
+    for(var j=0; j<6; j++){ spawnBubble(); }
+  })();
 })();
 </script>
 <!-- 兑换码数据（由 payment_monitor.py 自动生成，请勿手动修改） -->
