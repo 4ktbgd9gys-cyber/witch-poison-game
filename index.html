@@ -1588,14 +1588,18 @@
     <h3 id="pay-title">💳 扫码支付</h3>
     <p style="color:#f8d97a;font-size:15px;" id="pay-info">正在生成支付二维码...</p>
     <!-- 支付iframe区域 -->
-    <div style="margin:12px auto;border-radius:12px;overflow:hidden;box-shadow:0 0 20px rgba(200,160,32,0.3);background:#fff;min-height:300px;text-align:center;" id="pay-iframe-container">
-    <img src="pay_qrcode.png" alt="扫码支付" style="max-width:100%;max-height:340px;object-fit:contain;display:block;margin:0 auto;" onerror="this.onerror=null;this.style.display='none';document.getElementById('pay-fallback-text').style.display='block';">
-    <p id="pay-fallback-text" style="display:none;color:#aaa;padding:40px;font-size:14px;">二维码加载失败，请联系客服</p>
+    <div style="margin:12px auto;border-radius:12px;overflow:hidden;box-shadow:0 0 20px rgba(200,160,32,0.3);background:#fff;min-height:300px;text-align:center;padding:20px;" id="pay-iframe-container">
+      <!-- 手动扫码支付：直接显示二维码图片 -->
+      <img src="pay_qrcode.png" alt="扫码支付" style="max-width:260px;width:100%;display:block;margin:0 auto 12px;" onerror="this.style.display='none';document.getElementById('pay-fallback-text').style.display='block';">
+      <p id="pay-fallback-text" style="display:none;color:#aaa;padding:20px;font-size:14px;">二维码加载失败，请联系客服</p>
+      <p style="color:#c8a020;font-size:13px;margin:0;">扫码支付后，联系客服发放积分</p>
+      <!-- 自动支付（Cloudflare Worker 部署后取消注释）
       <div id="pay-loading" style="padding:60px 20px;text-align:center;">
         <div style="color:#888;font-size:13px;margin-bottom:12px;">⏳ 正在连接支付服务...</div>
         <div style="width:40px;height:40px;border:3px solid #c8a020;border-top-color:transparent;border-radius:50%;margin:0 auto;animation:spin 1s linear infinite;"></div>
       </div>
-      <iframe id="pay-iframe" style="display:none;width:100%;height:380px;border:none;" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation-by-user-activation" allow="payment"></iframe>
+      <iframe id="pay-iframe" style="display:none;width:100%;height:380px;border:none;"></iframe>
+      -->
     </div>
     <p style="color:#4ec94e;font-size:13px;margin-top:8px;" id="pay-auto-msg">🤖 <b>全自动到账</b>：付款后无需任何操作，积分自动到账！</p>
     <button class="recharge-close" onclick="closePayModal()" style="margin-top:6px;">✕ 关闭</button>
