@@ -47,60 +47,23 @@
     overflow: hidden;
   }
   /* ============================================================
-     主页炫酷CSS动画背景（多层特效，零加载时间）
+     主页背景视频
   ============================================================ */
-  #home-css-bg {
+  #home-video-bg {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: 0;
+  }
+  /* 视频加载失败 / autoplay被阻止 时的静态备用背景 */
+  #home-video-fallback {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
     background: linear-gradient(160deg,#040010 0%,#0d0320 15%,#150830 30%,#0a1025 50%,#1a0628 70%,#0d0318 100%);
     background-size: 400% 400%;
-    animation: bgShift 18s ease infinite;
+    animation: bgShift 18s ease-in-out infinite alternate;
+    display: none;
     z-index: 0;
-  }
-  /* 魔法光环层 */
-  #home-css-bg::before {
-    content: '';
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: 
-      radial-gradient(ellipse 70% 50% at 25% 35%, rgba(140,30,200,0.3) 0%, transparent 60%),
-      radial-gradient(ellipse 50% 60% at 75% 55%, rgba(30,100,200,0.2) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 40% at 50% 70%, rgba(20,180,100,0.15) 0%, transparent 60%),
-      radial-gradient(circle 200px at 80% 25%, rgba(248,217,122,0.1) 0%, transparent 100%);
-    animation: glowPulse 8s ease-in-out infinite alternate;
-  }
-  /* 星光层 - 双层星星不同速度产生视差 */
-  #home-css-bg::after {
-    content: '';
-    position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-    background-image:
-      /* 大星（亮） */
-      radial-gradient(2px 2px at 5% 10%,  rgba(255,255,255,0.9) 0%, transparent 100%),
-      radial-gradient(2px 2px at 15% 25%, rgba(255,240,200,0.85) 0%, transparent 100%),
-      radial-gradient(3px 3px at 25% 8%,  rgba(200,220,255,0.9) 0%, transparent 100%),
-      radial-gradient(2px 2px at 35% 40%, rgba(255,255,240,0.8) 0%, transparent 100%),
-      radial-gradient(3px 3px at 50% 15%, rgba(240,200,255,0.85) 0%, transparent 100%),
-      radial-gradient(2px 2px at 60% 35%, rgba(255,255,255,0.9) 0%, transparent 100%),
-      radial-gradient(3px 3px at 70% 10%, rgba(220,255,220,0.8) 0%, transparent 100%),
-      radial-gradient(2px 2px at 80% 30%, rgba(255,220,255,0.85) 0%, transparent 100%),
-      radial-gradient(3px 3px at 90% 12%, rgba(200,240,255,0.9) 0%, transparent 100%),
-      radial-gradient(2px 2px at 12% 55%, rgba(255,255,220,0.8) 0%, transparent 100%),
-      radial-gradient(3px 3px at 40% 50%, rgba(240,200,255,0.85) 0%, transparent 100%),
-      radial-gradient(2px 2px at 65% 55%, rgba(255,255,255,0.9) 0%, transparent 100%),
-      radial-gradient(3px 3px at 85% 60%, rgba(200,255,220,0.8) 0%, transparent 100%),
-      /* 小星（暗） */
-      radial-gradient(1px 1px at 8% 18%,  rgba(255,255,255,0.5) 0%, transparent 100%),
-      radial-gradient(1px 1px at 18% 35%, rgba(200,200,255,0.45) 0%, transparent 100%),
-      radial-gradient(1px 1px at 28% 50%, rgba(255,255,200,0.5) 0%, transparent 100%),
-      radial-gradient(1px 1px at 42% 22%, rgba(220,200,255,0.4) 0%, transparent 100%),
-      radial-gradient(1px 1px at 55% 48%, rgba(255,255,255,0.45) 0%, transparent 100%),
-      radial-gradient(1px 1px at 68% 20%, rgba(200,255,200,0.5) 0%, transparent 100%),
-      radial-gradient(1px 1px at 78% 52%, rgba(255,200,255,0.45) 0%, transparent 100%),
-      radial-gradient(1px 1px at 92% 38%, rgba(200,220,255,0.5) 0%, transparent 100%),
-      radial-gradient(1px 1px at 22% 70%, rgba(255,255,220,0.4) 0%, transparent 100%),
-      radial-gradient(1px 1px at 48% 68%, rgba(220,255,220,0.45) 0%, transparent 100%),
-      radial-gradient(1px 1px at 72% 72%, rgba(255,220,255,0.4) 0%, transparent 100%),
-      radial-gradient(1px 1px at 88% 75%, rgba(255,255,255,0.5) 0%, transparent 100%);
-    animation: starsParallax 15s linear infinite;
   }
   @keyframes bgShift {
     0%   { background-position: 0% 50%; }
@@ -1344,9 +1307,21 @@
      主页
 ====================================================== -->
 <div id="page-home" class="page active">
-  <!-- 多层CSS动画背景 -->
-  <div id="home-css-bg"></div>
-  <!-- 纯CSS星光粒子 -->
+  <!-- 背景视频 -->
+  <video id="home-video-bg" autoplay muted loop playsinline
+    x5-video-player-type="h5"
+    x5-video-player-fullscreen="true"
+    x5-playsinline="true"
+    webkit-playsinline="true"
+    style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0;">
+    <source src="b302c9894d9048244b6c0fc5a954d2a8.mp4" type="video/mp4">
+  </video>
+  <!-- 视频加载失败 / autoplay被阻止时的静态背景 -->
+  <div id="home-video-fallback"
+    style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;display:none;
+    background: linear-gradient(160deg,#040010 0%,#0d0320 15%,#150830 30%,#0a1025 50%,#1a0628 70%,#0d0318 100%);">
+  </div>
+  <!-- 纯CSS星光粒子（叠加在视频上） -->
   <span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span>
   <!-- JS魔法粒子层 -->
   <div class="magic-particles-layer" id="magic-particles"></div>
@@ -1375,6 +1350,11 @@
       <button class="stats-btn-home" onclick="showStats()">📊 战绩</button>
       <button class="redeem-btn-home" onclick="showRedeemModal()" style="background:linear-gradient(135deg,#6060c0,#4040a0);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:bold;cursor:pointer;margin-left:6px;">🎫 兑换码</button>
     </div>
+  <!-- 背景视频 -->
+  <video id="home-video-bg" autoplay muted loop playsinline preload="auto"
+    style="position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0.35;">
+    <source src="b302c9894d9048244b6c0fc5a954d2a8.mp4" type="video/mp4">
+  </video>
   <!-- 自定义设置区域（主页） -->
   <div class="custom-setup" id="custom-setup">
     <h3>⚙️ 自定义设置</h3>
@@ -3490,7 +3470,39 @@ function resetStats(){
   // 此处先用默认值更新一次UI，防止空白
   updateWalletDisplay();
 
-  // ---- 视频已替换为CSS动画背景，无需播放逻辑 ----
+  // 视频播放兜底（解决微信/移动端 autoplay 限制）
+  var video = document.getElementById('home-video-bg');
+  var fallback = document.getElementById('home-video-fallback');
+  if(video){
+    var p = video.play();
+    if(p !== undefined){
+      p.then(function(){
+        if(fallback) fallback.style.display = 'none';
+      }).catch(function(){
+        // autoplay 被阻止，500ms 后重试一次
+        setTimeout(function(){
+          video.play().then(function(){
+            if(fallback) fallback.style.display = 'none';
+          }).catch(function(){
+            // 彻底失败，显示静态背景
+            if(fallback) fallback.style.display = 'block';
+            video.style.display = 'none';
+          });
+        }, 500);
+      });
+    }
+    // 视频加载失败也显示静态背景
+    video.addEventListener('error', function(){
+      if(fallback) fallback.style.display = 'block';
+      video.style.display = 'none';
+    });
+  }
+  // 微信 X5 内核：WeixinJSBridgeReady 后再触发一次播放
+  if(typeof WeixinJSBridge !== 'undefined'){
+    document.addEventListener('WeixinJSBridgeReady', function(){
+      if(video) video.play();
+    }, false);
+  }
 
   // 恢复自定义名字
   var nameInput = document.getElementById('custom-name');
