@@ -1,0 +1,3621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>女巫的毒药</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Microsoft YaHei', '微软雅黑', 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', sans-serif; overflow: hidden; width: 100vw; height: 100vh; }
+
+  /* ===== 通用按钮 ===== */
+  .btn-witch {
+    background: linear-gradient(135deg, #6b0f1a, #b91372);
+    color: #f8d97a;
+    border: 2px solid #f8d97a;
+    padding: 14px 40px;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px #f8d97a;
+    box-shadow: 0 0 20px rgba(185,19,114,0.7);
+    transition: all 0.3s;
+  }
+  .btn-witch:hover {
+    background: linear-gradient(135deg, #b91372, #6b0f1a);
+    box-shadow: 0 0 35px rgba(248,217,122,0.8);
+    transform: scale(1.05);
+  }
+
+  /* ===== 页面容器 ===== */
+  .page { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; }
+  .page.active { display: flex; }
+
+  /* ===== 粒子层 ===== */
+  #particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+
+  /* ============================================================
+     主页
+  ============================================================ */
+  #page-home {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  /* ============================================================
+     主页背景视频
+  ============================================================ */
+  #home-video-bg {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: 0;
+  }
+  /* 视频加载失败 / autoplay被阻止 时的静态备用背景 */
+  #home-video-fallback {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(160deg,#040010 0%,#0d0320 15%,#150830 30%,#0a1025 50%,#1a0628 70%,#0d0318 100%);
+    background-size: 400% 400%;
+    animation: bgShift 18s ease-in-out infinite alternate;
+    display: none;
+    z-index: 0;
+  }
+  @keyframes bgShift {
+    0%   { background-position: 0% 50%; }
+    25%  { background-position: 50% 0%; }
+    50%  { background-position: 100% 50%; }
+    75%  { background-position: 50% 100%; }
+    100% { background-position: 0% 50%; }
+  }
+  @keyframes glowPulse {
+    0%   { opacity: 0.5; transform: scale(1); }
+    50%  { opacity: 0.9; transform: scale(1.03); }
+    100% { opacity: 0.5; transform: scale(1); }
+  }
+  @keyframes starsParallax {
+    0%   { transform: translate(0,0) rotate(0deg); opacity: 0.7; }
+    50%  { opacity: 1; }
+    100% { transform: translate(-60px,-40px) rotate(1deg); opacity: 0.7; }
+  }
+
+  /* 魔法粒子容器（JS注入） */
+  .magic-particles-layer {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 4; overflow: hidden;
+  }
+  .magic-particle {
+    position: absolute; border-radius: 50%;
+    animation: particleFloat var(--dur) ease-in-out infinite;
+    animation-delay: var(--delay);
+    opacity: 0;
+  }
+  @keyframes particleFloat {
+    0%   { transform: translate(0,0) scale(0); opacity: 0; }
+    10%  { opacity: var(--alpha); }
+    50%  { transform: translate(var(--dx), var(--dy)) scale(1); opacity: var(--alpha); }
+    90%  { opacity: 0; }
+    100% { transform: translate(var(--dx2), var(--dy2)) scale(0.2); opacity: 0; }
+  }
+
+  /* 星光粒子（纯CSS，不需要JS也能动） */
+  .star-particle {
+    position: absolute; border-radius: 50%; background: #f8d97a;
+    box-shadow: 0 0 6px 2px rgba(248,217,122,0.6);
+    pointer-events: none; z-index: 4;
+    animation: starFloat 6s ease-in-out infinite;
+  }
+  .star-particle:nth-child(1) { width:3px;height:3px;top:8%;left:12%;animation-delay:0s;animation-duration:6s; }
+  .star-particle:nth-child(2) { width:4px;height:4px;top:15%;left:75%;animation-delay:1.2s;animation-duration:7s; }
+  .star-particle:nth-child(3) { width:2px;height:2px;top:25%;left:45%;animation-delay:2.4s;animation-duration:5.5s; }
+  .star-particle:nth-child(4) { width:5px;height:5px;top:35%;left:22%;animation-delay:0.6s;animation-duration:8s; }
+  .star-particle:nth-child(5) { width:3px;height:3px;top:45%;left:82%;animation-delay:3s;animation-duration:6.5s; }
+  .star-particle:nth-child(6) { width:2px;height:2px;top:55%;left:35%;animation-delay:1.8s;animation-duration:5s; }
+  .star-particle:nth-child(7) { width:4px;height:4px;top:65%;left:65%;animation-delay:0.3s;animation-duration:7.5s; }
+  .star-particle:nth-child(8) { width:3px;height:3px;top:75%;left:18%;animation-delay:2.1s;animation-duration:6s; }
+  .star-particle:nth-child(9) { width:2px;height:2px;top:85%;left:55%;animation-delay:3.6s;animation-duration:5.5s; }
+  .star-particle:nth-child(10){ width:4px;height:4px;top:5%;left:52%;animation-delay:1s;animation-duration:8s; }
+  @keyframes starFloat {
+    0%   { transform: translate(0,0) scale(1); opacity: 0.3; }
+    25%  { opacity: 1; transform: translate(10px,-20px) scale(1.5); }
+    50%  { transform: translate(-5px,-40px) scale(0.8); opacity: 0.6; }
+    75%  { opacity: 1; transform: translate(15px,-15px) scale(1.3); }
+    100% { transform: translate(0,0) scale(1); opacity: 0.3; }
+  }
+
+  /* 半透明遮罩 */
+  .home-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.35);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* 魔法雾气 */
+  .home-fog {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background:
+      /* 紫色魔法雾 */
+      radial-gradient(ellipse 60% 30% at 30% 60%, rgba(100,20,180,0.06) 0%, transparent 100%),
+      radial-gradient(ellipse 40% 25% at 70% 40%, rgba(20,80,160,0.05) 0%, transparent 100%),
+      radial-gradient(ellipse 50% 20% at 50% 80%, rgba(20,140,80,0.04) 0%, transparent 100%),
+      repeating-linear-gradient(0deg, rgba(40,20,60,0.03) 0px, rgba(40,20,60,0.03) 2px, transparent 2px, transparent 50px),
+      repeating-linear-gradient(90deg, rgba(20,40,60,0.03) 0px, rgba(20,40,60,0.03) 2px, transparent 2px, transparent 50px);
+    animation: fogMove 12s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 2;
+  }
+  @keyframes fogMove { 
+    0%{transform:translate(0,0) scale(1); opacity:0.8;} 
+    50%{transform:translate(30px,20px) scale(1.02); opacity:1;}
+    100%{transform:translate(-20px,-10px) scale(0.98); opacity:0.8;}
+  }
+
+  /* 月亮 - 增强版带光晕环 */
+  .moon {
+    position: absolute; top: 50px; right: 100px;
+    width: 90px; height: 90px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fffde0, #f8d97a 50%, #d4a830 80%, #a07820);
+    box-shadow: 
+      0 0 30px 15px rgba(248,217,122,0.4),
+      0 0 80px 30px rgba(248,217,122,0.15),
+      0 0 150px 50px rgba(248,217,122,0.05);
+    z-index: 3;
+    animation: moonGlow 4s ease-in-out infinite alternate;
+  }
+  /* 月亮光晕环 */
+  .moon::before {
+    content: '';
+    position: absolute; top: -15px; left: -15px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    border: 1px solid rgba(248,217,122,0.2);
+    animation: moonRing 5s ease-in-out infinite alternate;
+  }
+  .moon::after {
+    content: '✦';
+    position: absolute; top: -18px; right: 10px;
+    font-size: 14px; color: #f8d97a;
+    animation: moonSpark 2s ease-in-out infinite;
+  }
+  @keyframes moonGlow {
+    0% { box-shadow: 0 0 30px 15px rgba(248,217,122,0.4), 0 0 80px 30px rgba(248,217,122,0.15), 0 0 150px 50px rgba(248,217,122,0.05); }
+    100% { box-shadow: 0 0 50px 25px rgba(248,217,122,0.55), 0 0 120px 45px rgba(248,217,122,0.25), 0 0 200px 70px rgba(248,217,122,0.1); }
+  }
+  @keyframes moonRing {
+    0% { transform: scale(1); opacity: 0.15; }
+    100% { transform: scale(1.15); opacity: 0.35; }
+  }
+  @keyframes moonSpark {
+    0%,100% { opacity: 0; transform: translate(0,0) scale(0.5); }
+    50% { opacity: 1; transform: translate(5px,-5px) scale(1); }
+  }
+
+  /* 蜘蛛 - 增强版带蛛丝 */
+  .witch-spider { z-index: 3; }
+  .spider-web {
+    position: absolute; pointer-events: none; z-index: 3;
+  }
+
+  /* 标题 */
+  .home-title {
+    position: relative; z-index: 10;
+    font-size: 64px;
+    color: #f8d97a;
+    text-shadow: 0 0 20px #f8d97a, 0 0 40px #b91372, 0 0 60px #6b0f1a, 0 0 100px rgba(185,19,114,0.3);
+    letter-spacing: 8px;
+    margin-bottom: 16px;
+    animation: titlePulse 3s ease-in-out infinite alternate;
+  }
+  @keyframes titlePulse {
+    0% { text-shadow: 0 0 20px #f8d97a, 0 0 40px #b91372, 0 0 60px #6b0f1a; transform: scale(1); }
+    100% { text-shadow: 0 0 50px #fff, 0 0 100px #f8d97a, 0 0 150px #b91372, 0 0 200px rgba(120,20,80,0.5); transform: scale(1.02); }
+  }
+  .home-subtitle {
+    position: relative; z-index: 10;
+    font-size: 18px; color: #b090d0; letter-spacing: 6px; margin-bottom: 60px;
+    animation: subtitleFade 2.5s ease-in-out infinite alternate;
+    text-shadow: 0 0 10px rgba(160,100,200,0.4);
+  }
+  @keyframes subtitleFade { 0%{opacity:0.4; letter-spacing:4px;} 100%{opacity:1; letter-spacing:8px;} }
+
+  /* 坩埚 - 增强版带气泡 */
+  .home-cauldron {
+    position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 10;
+    font-size: 80px; 
+    filter: drop-shadow(0 0 20px rgba(100,200,100,0.6)) drop-shadow(0 0 40px rgba(100,200,100,0.3));
+    animation: cauldronBubble 1.5s ease-in-out infinite alternate;
+    cursor: default;
+  }
+  @keyframes cauldronBubble { 0%{transform:translateX(-50%) scale(1)} 100%{transform:translateX(-50%) scale(1.05) translateY(-5px)} }
+  /* 坩埚气泡 */
+  .cauldron-bubble {
+    position: absolute; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(100,255,150,0.8), rgba(20,180,80,0.4));
+    box-shadow: 0 0 8px rgba(100,255,150,0.5);
+    pointer-events: none; z-index: 11;
+    animation: bubbleRise var(--bubdur) ease-out infinite;
+    animation-delay: var(--bubdelay);
+  }
+  @keyframes bubbleRise {
+    0% { transform: translateY(0) scale(0.3); opacity: 0.8; }
+    50% { opacity: 0.6; }
+    100% { transform: translateY(-120px) scale(1.2); opacity: 0; }
+  }
+
+  /* 魔法符文 */
+  .witch-rune {
+    position: absolute; pointer-events: none; z-index: 3;
+    font-size: 28px; color: rgba(200,160,255,0.3);
+    text-shadow: 0 0 15px rgba(160,100,220,0.5);
+    animation: runeGlow 3s ease-in-out infinite;
+  }
+  .witch-rune:nth-child(1) { top: 15%; left: 5%; animation-delay: 0s; }
+  .witch-rune:nth-child(2) { top: 12%; right: 8%; animation-delay: 1s; }
+  .witch-rune:nth-child(3) { bottom: 20%; left: 8%; animation-delay: 2s; }
+  .witch-rune:nth-child(4) { bottom: 18%; right: 5%; animation-delay: 0.5s; }
+  @keyframes runeGlow {
+    0%,100% { opacity: 0.15; transform: scale(0.9) rotate(-5deg); }
+    50% { opacity: 0.5; transform: scale(1.1) rotate(5deg); }
+  }
+
+  .home-btn-area { position: relative; z-index: 10; }
+  .witch-spider {
+    position: absolute; top: 180px; left: 60px;
+    font-size: 36px; animation: spiderSway 4s ease-in-out infinite alternate;
+    transform-origin: top center;
+    filter: drop-shadow(0 0 8px rgba(100,0,150,0.5));
+  }
+  @keyframes spiderSway { 0%{transform:rotate(-12deg)} 100%{transform:rotate(12deg)} }
+
+  /* ============================================================
+     规则页
+  ============================================================ */
+  #page-rules {
+    background: #1a0e08;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow-y: auto;
+    padding: 30px 20px 40px;
+  }
+  .rules-title {
+    font-size: 36px; color: #f8d97a;
+    text-shadow: 0 0 15px #f8d97a, 0 0 30px #b91372;
+    letter-spacing: 6px; margin-bottom: 28px; margin-top: 10px;
+  }
+  .rules-images-wrap {
+    display: flex; gap: 24px; flex-wrap: wrap; justify-content: center;
+    margin-bottom: 36px;
+  }
+  .rules-images-wrap img {
+    max-width: 480px; width: 44vw; min-width: 260px;
+    border: 3px solid #6b2f0a;
+    border-radius: 10px;
+    box-shadow: 0 0 30px rgba(107,15,26,0.8);
+  }
+  .rules-summary {
+    background: rgba(0,0,0,0.55);
+    border: 1px solid #6b2f0a;
+    border-radius: 10px;
+    padding: 20px 30px;
+    color: #f0d090;
+    max-width: 860px;
+    width: 90%;
+    font-size: 15px;
+    line-height: 2;
+    margin-bottom: 30px;
+  }
+  .rules-summary h3 { color: #f8d97a; margin-bottom: 10px; font-size: 18px; }
+  .rules-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px; margin-top: 12px;
+  }
+  .rules-card-item {
+    background: rgba(107,15,26,0.3);
+    border: 1px solid #b91372;
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+    font-size: 13px;
+    color: #f8d97a;
+  }
+  .rules-card-item .count { color: #a0e0a0; font-size: 12px; }
+
+  /* ============================================================
+     匹配页
+  ============================================================ */
+  #page-match {
+    background: radial-gradient(ellipse, #12080a 30%, #000 100%);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .match-title { font-size: 32px; color: #f8d97a; letter-spacing: 4px; margin-bottom: 40px; text-shadow: 0 0 15px #b91372; }
+  .match-players {
+    display: flex; gap: 30px; margin-bottom: 40px; flex-wrap: wrap; justify-content: center;
+  }
+  .match-player-slot {
+    width: 130px; height: 160px;
+    border: 2px solid #6b2f0a;
+    border-radius: 12px;
+    background: rgba(0,0,0,0.6);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 10px;
+    transition: all 0.5s;
+    position: relative; overflow: hidden;
+  }
+  .match-player-slot.filled {
+    border-color: #f8d97a;
+    box-shadow: 0 0 20px rgba(248,217,122,0.4);
+    background: rgba(107,15,26,0.5);
+  }
+  .match-player-slot.me {
+    border-color: #b91372;
+    box-shadow: 0 0 25px rgba(185,19,114,0.7);
+  }
+  .match-avatar { font-size: 48px; }
+  .match-name { font-size: 13px; color: #f0d090; text-align: center; }
+  .match-tag {
+    font-size: 10px; color: #a0e0a0; padding: 2px 6px;
+    background: rgba(0,100,0,0.4); border-radius: 4px;
+  }
+  .match-tag.ai { color: #f0a060; background: rgba(100,50,0,0.4); }
+  .match-status { font-size: 16px; color: #a080c0; margin-bottom: 20px; min-height: 24px; }
+  .match-progress {
+    width: 300px; height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px; overflow: hidden; margin-bottom: 30px;
+  }
+  .match-progress-bar {
+    height: 100%; width: 0;
+    background: linear-gradient(90deg, #b91372, #f8d97a);
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+  .match-waiting-dots::after {
+    content: '';
+    animation: waitDots 1.5s steps(4, end) infinite;
+  }
+  @keyframes waitDots {
+    0%{content:''} 25%{content:'.'} 50%{content:'..'} 75%{content:'...'} 100%{content:''}
+  }
+
+  /* ============================================================
+     游戏主体
+  ============================================================ */
+  #page-game {
+    background: #1a0e06;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  /* 破桌子背景纹理 */
+  #page-game::before {
+    content: '';
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background:
+      repeating-linear-gradient(45deg, rgba(80,40,10,0.08) 0px, rgba(80,40,10,0.08) 1px, transparent 1px, transparent 20px),
+      repeating-linear-gradient(-45deg, rgba(80,40,10,0.05) 0px, rgba(80,40,10,0.05) 1px, transparent 1px, transparent 20px),
+      radial-gradient(ellipse at 20% 30%, rgba(60,30,10,0.6) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 70%, rgba(40,20,5,0.8) 0%, transparent 50%),
+      linear-gradient(160deg, #2a1505, #1a0e06 40%, #0e0703 100%);
+    pointer-events: none; z-index: 0;
+  }
+  /* 木纹裂缝 */
+  #page-game::after {
+    content: '';
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background-image:
+      linear-gradient(87deg, transparent 48%, rgba(0,0,0,0.3) 49%, rgba(0,0,0,0.3) 51%, transparent 52%),
+      linear-gradient(3deg, transparent 45%, rgba(0,0,0,0.2) 46%, rgba(0,0,0,0.2) 47%, transparent 48%),
+      linear-gradient(170deg, transparent 60%, rgba(0,0,0,0.25) 61%, rgba(0,0,0,0.25) 62%, transparent 63%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .game-header {
+    position: relative; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 16px;
+    background: rgba(0,0,0,0.7);
+    border-bottom: 2px solid #6b2f0a;
+    flex-shrink: 0;
+  }
+  .game-title-small { font-size: 18px; color: #f8d97a; letter-spacing: 3px; text-shadow: 0 0 10px #f8d97a; }
+  .game-round-info { font-size: 14px; color: #a080c0; }
+  .game-btn-sm {
+    background: rgba(107,15,26,0.7); color: #f8d97a;
+    border: 1px solid #b91372; border-radius: 4px;
+    padding: 4px 12px; font-size: 13px; cursor: pointer;
+  }
+  .game-btn-sm:hover { background: rgba(185,19,114,0.5); }
+
+  .game-body {
+    position: relative; z-index: 5;
+    display: flex; flex: 1; overflow: hidden; gap: 10px; padding: 10px;
+  }
+
+  /* --- 左侧：玩家列表 --- */
+  .players-panel {
+    width: 130px; flex-shrink: 0;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .player-card {
+    background: rgba(0,0,0,0.65);
+    border: 1px solid #4a2010;
+    border-radius: 8px;
+    padding: 8px;
+    transition: all 0.3s;
+  }
+  .player-card.active-turn {
+    border-color: #f8d97a;
+    box-shadow: 0 0 12px rgba(248,217,122,0.5);
+    background: rgba(107,15,26,0.5);
+  }
+  .player-card.me-player { border-color: #b91372; }
+  .player-card.eliminated {
+    opacity: 0.4; -webkit-filter: grayscale(1); filter: grayscale(1);
+    border-color: #333;
+  }
+  .pc-avatar { font-size: 28px; text-align: center; }
+  .pc-name { font-size: 11px; color: #f0d090; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pc-score { font-size: 18px; color: #f8d97a; text-align: center; font-weight: bold; }
+  .pc-score-label { font-size: 10px; color: #808080; text-align: center; }
+  .pc-status { font-size: 10px; text-align: center; color: #a080c0; min-height: 14px; }
+  .pc-shield { font-size: 11px; text-align: center; }
+  .turn-arrow { font-size: 16px; text-align: center; color: #f8d97a; animation: arrowBlink 0.8s ease-in-out infinite alternate; }
+  @keyframes arrowBlink { 0%{opacity:0.3} 100%{opacity:1} }
+
+  /* --- 中间：卡牌区 --- */
+  .cards-area {
+    flex: 1;
+    display: flex; flex-direction: column; gap: 8px;
+    overflow: hidden;
+  }
+
+  .card-grid-wrap {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    width: 100%;
+    max-width: 500px;
+  }
+
+  /* 单张卡牌 */
+  .card-item {
+    position: relative;
+    height: 0;
+    padding-bottom: 143%; /* 替代 aspect-ratio:0.7 兼容所有浏览器 */
+    perspective: 800px;
+    cursor: pointer;
+  }
+  .card-item.disabled { cursor: default; }
+  .card-inner {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease-in-out;
+    border-radius: 8px;
+  }
+  .card-item.flipped .card-inner { transform: rotateY(180deg); }
+  .card-face, .card-back {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    backface-visibility: hidden;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .card-back {
+    background: linear-gradient(135deg, #2a0a1a, #1a0a2a);
+    border: 2px solid #6b2f3a;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    box-shadow: inset 0 0 10px rgba(185,19,114,0.3);
+  }
+  .card-back-pattern {
+    width: 70%; height: 70%;
+    border: 1px solid #4a2050;
+    border-radius: 4px;
+    background:
+      repeating-linear-gradient(45deg, rgba(185,19,114,0.08) 0px, rgba(185,19,114,0.08) 2px, transparent 2px, transparent 8px),
+      repeating-linear-gradient(-45deg, rgba(107,15,26,0.08) 0px, rgba(107,15,26,0.08) 2px, transparent 2px, transparent 8px);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .card-face {
+    background: #1a0a0a;
+    border: 2px solid #6b2f0a;
+    transform: rotateY(180deg);
+    display: flex; flex-direction: column;
+  }
+  .card-face img {
+    width: 100%; flex: 1; object-fit: cover;
+    min-height: 0;
+  }
+  .card-face-name {
+    padding: 3px; font-size: 11px; color: #f8d97a; text-align: center;
+    background: rgba(0,0,0,0.7); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .card-item:hover:not(.flipped):not(.disabled) .card-back {
+    border-color: #f8d97a;
+    box-shadow: inset 0 0 15px rgba(248,217,122,0.3), 0 0 10px rgba(248,217,122,0.3);
+  }
+  /* 偷看时牌背显示的图片 */
+  .card-back img.peek-reveal {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 2px solid #60ffaa;
+    box-shadow: 0 0 12px rgba(96,255,170,0.6);
+  }
+  .card-item.peek-glow .card-back {
+    border-color: #60d0ff;
+    box-shadow: 0 0 15px rgba(96,208,255,0.6);
+  }
+  .card-item.used { opacity: 0.4; cursor: default; }
+  .card-item.used .card-inner { -webkit-filter: grayscale(0.8); filter: grayscale(0.8); }
+
+  /* 我的牌（高亮可点击） */
+  .my-turn-active .card-item:not(.flipped):not(.used) .card-back {
+    border-color: #f8d97a;
+    box-shadow: inset 0 0 8px rgba(248,217,122,0.2), 0 0 6px rgba(248,217,122,0.3);
+    animation: cardPulse 1.5s ease-in-out infinite alternate;
+  }
+  @keyframes cardPulse {
+    0%{box-shadow: inset 0 0 8px rgba(248,217,122,0.2), 0 0 6px rgba(248,217,122,0.3);}
+    100%{box-shadow: inset 0 0 15px rgba(248,217,122,0.4), 0 0 12px rgba(248,217,122,0.5);}
+  }
+
+  /* 特效目标选择态 */
+  .card-item.target-select:not(.flipped):not(.used) .card-back {
+    border-color: #60ffaa;
+    box-shadow: 0 0 12px rgba(96,255,170,0.6);
+    animation: targetPulse 0.7s ease-in-out infinite alternate;
+  }
+  @keyframes targetPulse {
+    0%{box-shadow:0 0 8px rgba(96,255,170,0.5);} 100%{box-shadow:0 0 18px rgba(96,255,170,0.8);}
+  }
+  .card-item.swap-selected:not(.flipped):not(.used) .card-back {
+    border-color: #c0a0ff;
+    box-shadow: 0 0 16px rgba(192,160,255,0.7);
+    animation: swapPulse 0.5s ease-in-out infinite alternate;
+  }
+  @keyframes swapPulse {
+    0%{box-shadow:0 0 8px rgba(192,160,255,0.5);} 100%{box-shadow:0 0 20px rgba(192,160,255,0.9);}
+  }
+
+  /* 偷取/选择覆盖层 */
+  .steal-overlay {
+    position:fixed; top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,0.8); z-index:200;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .steal-panel {
+    background:linear-gradient(135deg, #1a0a2e, #0d0d2b);
+    border:2px solid #6b0f1a; border-radius:12px;
+    padding:24px; max-width:380px; width:90%;
+    color:#f0e0d0; text-align:center;
+  }
+  .steal-panel h3 { color:#f8d97a; margin-bottom:16px; font-size:18px; }
+  .steal-targets { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
+  .steal-btn {
+    background:linear-gradient(135deg, #2a1040, #1a0a2e);
+    color:#f0e0d0; border:1px solid #6b0f1a; border-radius:8px;
+    padding:12px 20px; font-size:15px; cursor:pointer;
+    transition:all 0.2s;
+  }
+  .steal-btn:hover {
+    background:linear-gradient(135deg, #6b0f1a, #b91372);
+    border-color:#f8d97a; color:#f8d97a;
+  }
+  /* 强运甘露选牌 */
+  .draw-two-cards { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+  .draw-card-item {
+    background:linear-gradient(135deg, #1a1a3e, #0d0d2b);
+    border:2px solid #6b0f1a; border-radius:10px;
+    padding:16px; cursor:pointer; width:140px; text-align:center;
+    transition:all 0.2s;
+  }
+  .draw-card-item:hover { border-color:#f8d97a; box-shadow:0 0 20px rgba(248,217,122,0.4); }
+  .draw-card-item img { width:80px; height:80px; object-fit:cover; border-radius:6px; margin-bottom:8px; }
+  .draw-name { color:#f8d97a; font-weight:bold; font-size:14px; margin-bottom:4px; }
+  .draw-desc { color:#aaa; font-size:11px; }
+
+  /* --- 右侧：道具牌 --- */
+  .tools-panel {
+    width: 120px; flex-shrink: 0;
+    display: flex; flex-direction: column;
+    gap: 8px;
+  }
+  .tools-title {
+    font-size: 13px; color: #f8d97a; text-align: center;
+    text-shadow: 0 0 8px #f8d97a; letter-spacing: 2px;
+  }
+  .tool-pile {
+    background: rgba(0,0,0,0.6);
+    border: 1px solid #4a2010;
+    border-radius: 8px;
+    padding: 16px 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex: 1;
+    min-height: 140px;
+  }
+  /* 道具叠牌 */
+  .tool-deck { position: relative; width: 80px; height: 110px; }
+  .tool-deck-shadow {
+    position: absolute;
+    width: 80px; height: 110px;
+    background: linear-gradient(135deg, #1a0e08, #2d1505);
+    border: 1px solid #6b2f0a;
+    border-radius: 6px;
+    z-index: 0;
+  }
+  .tool-deck-top {
+    position: absolute;
+    top: 0; left: 0;
+    width: 80px; height: 110px;
+    background: linear-gradient(135deg, #2d1505, #3d1a08);
+    border: 2px solid #f8d97a;
+    border-radius: 6px;
+    z-index: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  }
+  .tool-deck-top:hover { border-color: #ffe0a0; box-shadow: 0 4px 20px rgba(248,217,122,0.3); }
+  .tool-deck-back {
+    font-size: 36px;
+    opacity: 0.8;
+  }
+  .tool-deck-total {
+    font-size: 13px; font-weight: bold;
+    color: #f8d97a;
+    text-shadow: 0 0 8px #f8d97a;
+    margin-top: 4px;
+  }
+  .tool-card .tool-name { font-size: 10px; color: #f0d090; text-align: center; padding: 2px; background: rgba(0,0,0,0.6); }
+  .tool-card .tool-count {
+    position: absolute; top: 3px; right: 4px;
+    background: rgba(185,19,114,0.85);
+    color: #fff; font-size: 10px;
+    width: 16px; height: 16px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold;
+  }
+  .my-tools-label { font-size: 11px; color: #a080c0; text-align: center; }
+  .my-tools-area {
+    display: flex; flex-wrap: wrap; gap: 4px; justify-content: center;
+  }
+  .my-tool-badge {
+    background: rgba(107,15,26,0.7);
+    border: 1px solid #b91372;
+    border-radius: 4px; padding: 3px 5px;
+    font-size: 10px; color: #f8d97a; cursor: pointer;
+    transition: all 0.2s; text-align: center;
+  }
+  .my-tool-badge:hover { background: rgba(185,19,114,0.6); }
+  .my-tool-badge.activated {
+    border-color: #60ff90; color: #60ff90;
+    animation: toolActivated 0.4s ease;
+  }
+  @keyframes toolActivated { 0%{transform:scale(1.2)} 100%{transform:scale(1)} }
+
+  /* 5积分兑换按钮 */
+  .redeem-btn {
+    background: linear-gradient(135deg, rgba(60,30,0,0.9), rgba(100,60,10,0.9));
+    border: 1px solid #c8a020;
+    border-radius: 6px;
+    color: #f8d97a;
+    font-size: 11px;
+    padding: 5px 4px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 4px;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+    text-shadow: 0 0 6px #c8a020;
+  }
+  .redeem-btn:hover { background: linear-gradient(135deg, rgba(100,60,10,0.9), rgba(180,120,20,0.9)); box-shadow: 0 0 10px rgba(200,160,32,0.5); }
+  .redeem-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ============================================================
+     结算页
+  ============================================================ */
+  #page-result {
+    background: radial-gradient(ellipse, #12080a 30%, #000 100%);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+  .result-title { font-size: 48px; color: #f8d97a; text-shadow: 0 0 30px #f8d97a, 0 0 60px #b91372; letter-spacing: 6px; }
+  .result-subtitle { font-size: 22px; color: #a080c0; }
+  .result-rankings {
+    background: rgba(0,0,0,0.6);
+    border: 2px solid #6b2f0a;
+    border-radius: 12px;
+    padding: 20px 30px;
+    width: 360px;
+  }
+  .rank-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 10px 0; border-bottom: 1px solid rgba(107,47,10,0.4);
+    font-size: 16px; color: #f0d090;
+  }
+  .rank-row:last-child { border-bottom: none; }
+  .rank-medal { font-size: 24px; width: 32px; text-align: center; }
+  .rank-player-name { flex: 1; }
+  .rank-score { font-size: 20px; font-weight: bold; color: #f8d97a; }
+  .rank-eliminated { font-size: 12px; color: #ff4444; }
+  .result-btns { display: flex; gap: 16px; }
+
+  /* ============================================================
+     浮层：卡牌翻开特效
+  ============================================================ */
+  .effect-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 100; pointer-events: none;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .effect-toast {
+    background: rgba(0,0,0,0.9);
+    border: 2px solid #f8d97a;
+    border-radius: 12px;
+    padding: 20px 40px;
+    text-align: center;
+    transform: scale(0); opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+  .effect-toast.show { transform: scale(1); opacity: 1; }
+  .effect-toast .effect-icon { font-size: 48px; margin-bottom: 8px; }
+  .effect-toast .effect-name { font-size: 22px; color: #f8d97a; margin-bottom: 6px; }
+  .effect-toast .effect-desc { font-size: 15px; color: #f0d090; }
+  .effect-toast.danger-effect {
+    border-color: #ff4444;
+    background: rgba(80,0,0,0.95);
+  }
+  .effect-toast.danger-effect .effect-name { color: #ff4444; }
+
+  /* pick-modal：选择目标 */
+  .pick-modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 200;
+    background: rgba(0,0,0,0.7);
+    display: none; align-items: center; justify-content: center;
+  }
+  .pick-modal.show { display: flex; }
+  .pick-box {
+    background: rgba(10,5,2,0.95);
+    border: 2px solid #b91372;
+    border-radius: 12px;
+    padding: 24px; text-align: center; min-width: 300px;
+  }
+  .pick-box h3 { font-size: 20px; color: #f8d97a; margin-bottom: 18px; }
+  .pick-options { display: flex; flex-direction: column; gap: 10px; }
+  .pick-option {
+    background: rgba(107,15,26,0.5);
+    border: 1px solid #b91372;
+    border-radius: 6px;
+    padding: 10px 20px;
+    color: #f0d090; font-size: 15px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .pick-option:hover { background: rgba(185,19,114,0.5); border-color: #f8d97a; color: #f8d97a; }
+
+  /* 卡牌翻开时闪光 */
+  .card-flash {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(248,217,122,0.4), transparent 70%);
+    border-radius: 50%;
+    animation: flashAnim 0.4s ease-out forwards;
+    pointer-events: none; z-index: 50;
+  }
+  @keyframes flashAnim { 0%{opacity:1;transform:translate(-50%,-50%) scale(0)} 100%{opacity:0;transform:translate(-50%,-50%) scale(3)} }
+
+  /* 下毒特效 */
+  .poison-splash {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(ellipse, rgba(100,0,200,0.6), transparent 70%);
+    animation: poisonFade 1.5s ease-out forwards;
+    pointer-events: none; z-index: 80;
+  }
+  @keyframes poisonFade { 0%{opacity:1} 100%{opacity:0} }
+
+  /* 消分特效（偷分） */
+  .score-steal-anim {
+    position: fixed;
+    font-size: 28px; color: #ff6060; font-weight: bold;
+    animation: scoreFly 1.2s ease-out forwards;
+    pointer-events: none; z-index: 60;
+  }
+  @keyframes scoreFly { 0%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-80px)} }
+  .score-gain-anim {
+    position: fixed;
+    font-size: 28px; color: #60ff90; font-weight: bold;
+    animation: scoreFly 1.2s ease-out forwards;
+    pointer-events: none; z-index: 60;
+  }
+
+  /* 加分特效 */
+  .double-glow { border-color: #ffff00 !important; box-shadow: 0 0 20px rgba(255,255,0,0.6) !important; }
+  
+  /* ============================================================
+     钱包栏
+  ============================================================ */
+  .wallet-bar {
+    position: relative; z-index: 10;
+    display: flex; align-items: center; justify-content: center; gap: 16px;
+    margin: 20px 0 40px;
+    background: rgba(0,0,0,0.65);
+    flex-wrap: wrap;
+    padding: 10px 16px;
+    border: 1px solid #c8a020;
+    border-radius: 12px;
+    padding: 12px 30px;
+    box-shadow: 0 0 20px rgba(200,160,32,0.3);
+  }
+  .wallet-coin { font-size: 28px; }
+  .wallet-amount {
+    font-size: 36px; font-weight: bold;
+    color: #f8d97a;
+    text-shadow: 0 0 10px #f8d97a;
+    letter-spacing: 2px;
+    transition: all 0.4s;
+  }
+  .wallet-cost {
+    font-size: 13px; color: #a080c0;
+    border-left: 1px solid #4a2050; padding-left: 14px;
+    white-space: nowrap;
+    line-height: 1.6;
+  }
+  .wallet-delta {
+    display: inline-block; font-size: 18px; font-weight: bold;
+    margin-left: 8px;
+    animation: scoreFly 1.2s ease-out forwards;
+  }
+  .wallet-delta.plus { color: #60ff90; }
+  .wallet-delta.minus { color: #ff6060; }
+
+  /* 主页充值按钮 */
+  .recharge-btn-home {
+    background: linear-gradient(135deg, #c8a020, #e8c840);
+    color: #1a0e08;
+    border: none;
+    padding: 6px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: all 0.2s;
+  }
+  .recharge-btn-home:hover {
+    background: linear-gradient(135deg, #e8c840, #f8d97a);
+    box-shadow: 0 0 15px rgba(248,217,122,0.5);
+    transform: scale(1.05);
+  }
+
+  /* 充值弹窗 */
+  .recharge-modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 300;
+    background: rgba(0,0,0,0.8);
+    display: none; align-items: center; justify-content: center;
+  }
+  .recharge-modal.show { display: flex; }
+  .recharge-box {
+    background: linear-gradient(135deg, #1a0e08, #0a0a1a);
+    border: 2px solid #c8a020;
+    border-radius: 16px;
+    padding: 30px;
+    text-align: center;
+    max-width: 400px; width: 90%;
+    box-shadow: 0 0 40px rgba(200,160,32,0.4);
+  }
+  .recharge-box h3 {
+    font-size: 24px; color: #f8d97a; margin-bottom: 8px;
+    text-shadow: 0 0 10px #f8d97a;
+  }
+  .recharge-box p { font-size: 14px; color: #a080c0; margin-bottom: 20px; }
+  .recharge-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .recharge-opt {
+    background: rgba(107,15,26,0.3);
+    border: 1px solid #b91372;
+    border-radius: 8px;
+    padding: 12px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; transition: all 0.2s;
+    color: #f0d090;
+  }
+  .recharge-opt:hover { background: rgba(185,19,114,0.4); border-color: #f8d97a; }
+  .recharge-opt .opt-amount { font-size: 22px; font-weight: bold; color: #f8d97a; }
+  .recharge-opt .opt-price { font-size: 14px; color: #a080c0; }
+  .recharge-close {
+    background: rgba(255,255,255,0.1); color: #808080;
+    border: 1px solid #444;
+    border-radius: 6px; padding: 8px 24px; cursor: pointer;
+    font-size: 14px; transition: all 0.2s;
+  }
+  .recharge-close:hover { background: rgba(255,255,255,0.2); color: #ccc; }
+
+  /* ============================================================
+     转盘抽先手
+  ============================================================ */
+  .spinner-modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 350;
+    background: rgba(0,0,0,0.85);
+    display: none; align-items: center; justify-content: center;
+    flex-direction: column;
+  }
+  .spinner-modal.show { display: flex; }
+  .spinner-title {
+    font-size: 26px; color: rgba(255,255,255,0.85);
+    margin-bottom: 30px;
+    letter-spacing: 3px;
+  }
+  .spinner-wheel {
+    position: relative;
+    width: 260px; height: 260px;
+    border-radius: 50%;
+    border: 3px solid rgba(255,255,255,0.45);
+    background: #1a1a2e; /* conic-gradient 降级兼容 */
+    background: conic-gradient(
+      rgba(255,255,255,0.06) 0deg,   rgba(255,255,255,0.06) 90deg,
+      rgba(255,255,255,0.14) 90deg,  rgba(255,255,255,0.14) 180deg,
+      rgba(255,255,255,0.06) 180deg, rgba(255,255,255,0.06) 270deg,
+      rgba(255,255,255,0.14) 270deg, rgba(255,255,255,0.14) 360deg
+    );
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+    overflow: hidden;
+  }
+  .spinner-wheel > div {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+  }
+  .spinner-p1, .spinner-p2, .spinner-p3, .spinner-p4 {
+    clip-path: none; background: transparent;
+  }
+  /* 头像居中在各扇区中心（conic-gradient: 0°=顶部, 顺时针） */
+  /* p1=0~90°右上/ p2=90~180°右下/ p3=180~270°左下/ p4=270~360°左上 */
+  .spinner-avatar {
+    font-size: 36px; position: absolute;
+    transform: translate(-50%,-50%);
+  }
+  .spinner-avatar.pos-top    { top: 28%; left: 72%; }   /* p1 右上中心 */
+  .spinner-avatar.pos-right  { top: 72%; left: 72%; }   /* p2 右下中心 */
+  .spinner-avatar.pos-bottom { top: 72%; left: 28%; }   /* p3 左下中心 */
+  .spinner-avatar.pos-left   { top: 28%; left: 28%; }   /* p4 左上中心 */
+  .spinner-name-tag {
+    position: absolute;
+    font-size: 11px; font-weight: bold;
+    color: #fff; text-shadow: 0 0 4px #000;
+    transform: translate(-50%,-50%);
+  }
+  .spinner-name-tag.pos-top    { top: 40%; left: 72%; }
+  .spinner-name-tag.pos-right  { top: 82%; left: 72%; }
+  .spinner-name-tag.pos-bottom { top: 82%; left: 28%; }
+  .spinner-name-tag.pos-left   { top: 40%; left: 28%; }
+  .spinner-arrow {
+    position: absolute; top: -22px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 36px; color: rgba(255,255,255,0.7);
+    z-index: 5;
+  }
+  .spinner-result {
+    margin-top: 25px;
+    font-size: 22px; color: rgba(255,255,255,0.9);
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  .spinner-result.show { opacity: 1; }
+
+  /* ============================================================
+     移动端响应式
+  ============================================================ */
+  @media (max-width: 700px) {
+    /* --- 主页 --- */
+    .home-title {
+      font-size: 36px; letter-spacing: 4px;
+      margin-bottom: 8px; padding: 0 10px;
+      text-align: center;
+    }
+    .home-subtitle {
+      font-size: 13px; letter-spacing: 3px;
+      margin-bottom: 20px; padding: 0 10px;
+      text-align: center;
+    }
+    .moon { top: 15px; right: 15px; width: 50px; height: 50px; }
+    .moon::before { top: -8px; left: -8px; width: 66px; height: 66px; }
+    .moon::after { top: -10px; right: 5px; font-size: 10px; }
+    .witch-spider { top: 60px; left: 5px; font-size: 22px; }
+    .home-cauldron { bottom: 20px; font-size: 45px; }
+    .witch-rune { font-size: 18px; }
+    .star-particle { display: none; }
+    .cauldron-bubble { display: none; }
+    .spider-web { display: none; }
+
+    /* 钱包栏 */
+    .wallet-bar {
+      gap: 8px; padding: 8px 12px;
+      margin: 0 10px 16px;
+      flex-wrap: wrap; justify-content: center;
+    }
+    .wallet-amount { font-size: 24px; }
+    .wallet-cost { font-size: 11px; padding-left: 8px; border-left: none; }
+    .wallet-coin { font-size: 22px; }
+    .recharge-btn-home { padding: 6px 12px; font-size: 12px; }
+    .stats-btn-home { padding: 6px 12px; font-size: 12px; }
+
+    /* 自定义设置 */
+    .custom-setup { margin: 0 10px; padding: 12px 14px; }
+    .avatar-grid { gap: 8px; }
+    .avatar-grid img { width: 44px; height: 44px; }
+
+    /* 按钮 */
+    .btn-witch { padding: 12px 28px; font-size: 16px; letter-spacing: 2px; }
+
+    /* --- 规则页 --- */
+    .rules-title { font-size: 24px; letter-spacing: 3px; }
+    .rules-images-wrap img { width: 90vw; min-width: auto; max-width: 100%; }
+
+    /* --- 匹配页 --- */
+    .match-title { font-size: 22px; }
+    .match-player-slot { width: 100px; height: 130px; }
+    .match-players { gap: 12px; }
+
+    /* --- 游戏页 --- */
+    .game-body { flex-direction: column; }
+    .players-panel { width: 100%; flex-direction: row; overflow-x: auto; }
+    .player-card { min-width: 70px; padding: 6px; font-size: 11px; }
+    .tools-panel { width: 100%; flex-direction: row; overflow-x: auto; }
+    .tool-pile { flex-direction: row; flex: none; height: 90px; }
+    .board { grid-template-columns: repeat(5, 1fr); gap: 4px; max-width: 95vw; }
+    .card { padding: 4px; }
+    .card-img { width: 50px; height: 50px; }
+
+    /* --- 排名页 --- */
+    .rank-box { width: 90vw; padding: 16px; }
+
+    /* --- 充值弹窗 --- */
+    .recharge-box { max-width: 92vw; padding: 20px; }
+
+    /* --- 转盘 --- */
+    .spinner-wheel { width: 200px; height: 200px; }
+  }
+
+  /* ============================================================
+     自定义设置（名字 + 头像选择）
+  ============================================================ */
+  .custom-setup {
+    background: rgba(0,0,0,0.5);
+    border: 1px solid #6b2f0a;
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 24px;
+    max-width: 480px;
+    width: 90%;
+    position: relative;
+    z-index: 10;
+  }
+  .custom-setup h3 {
+    color: #f8d97a;
+    font-size: 15px;
+    margin-bottom: 14px;
+    letter-spacing: 2px;
+  }
+  .name-input {
+    background: rgba(0,0,0,0.6);
+    border: 2px solid #6b2f0a;
+    border-radius: 8px;
+    color: #f0d090;
+    font-size: 16px;
+    padding: 10px 16px;
+    width: 100%;
+    max-width: 260px;
+    outline: none;
+    transition: border-color 0.3s;
+    font-family: inherit;
+  }
+  .name-input:focus {
+    border-color: #f8d97a;
+    box-shadow: 0 0 10px rgba(248,217,122,0.3);
+  }
+  .name-input::placeholder { color: #555; }
+  .avatar-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-start;
+  }
+  .avatar-option {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 2px solid #444;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.25s;
+    object-fit: cover;
+    opacity: 0.65;
+    flex-shrink: 0;
+  }
+  .avatar-option:hover {
+    opacity: 1;
+    border-color: #f8d97a;
+    transform: scale(1.12);
+    box-shadow: 0 0 12px rgba(248,217,122,0.4);
+  }
+  .avatar-option.selected {
+    border-color: #b91372;
+    opacity: 1;
+    box-shadow: 0 0 16px rgba(185,19,114,0.75);
+    transform: scale(1.12);
+  }
+  /* 游戏中显示头像图片 */
+  .pc-avatar-img {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #6b2f0a;
+    display: block;
+    margin: 0 auto 2px;
+  }
+  .match-avatar-img {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #6b2f0a;
+  }
+  .spinner-avatar-img {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.3);
+    display: inline;
+  }
+  .result-avatar-img {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #6b2f0a;
+    vertical-align: middle;
+  }
+  .picker-avatar-img {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+    vertical-align: middle;
+    border: 1px solid rgba(255,255,255,0.3);
+  }
+/* ============================================================
+   个人战绩弹窗
+   ============================================================ */
+.stats-modal {
+  position: fixed; top:0; left:0; width:100%; height:100%;
+  background: rgba(0,0,0,0.75);
+  display: none; align-items:center; justify-content:center;
+  z-index: 10001;
+}
+.stats-modal.show { display: flex; }
+.stats-box {
+  background: linear-gradient(135deg, #1a0a2e, #0d0515);
+  border: 2px solid #f8d97a;
+  border-radius: 16px;
+  padding: 30px 36px;
+  min-width: 340px;
+  max-width: 420px;
+  color: #f0d090;
+  box-shadow: 0 0 60px rgba(248,217,122,0.3);
+  position: relative;
+}
+.stats-box h3 { text-align:center; color:#f8d97a; font-size:22px; margin-bottom:20px; letter-spacing:2px; }
+.stats-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(248,217,122,0.15);
+  font-size: 15px;
+}
+.stats-row:last-child { border-bottom: none; }
+.stats-label { color: #a080c0; }
+.stats-value { color: #f8d97a; font-weight: bold; font-size: 17px; }
+.stats-value.win { color: #60ff90; }
+.stats-value.lose { color: #ff6060; }
+.stats-close-btn {
+  display: block;
+  margin: 20px auto 0;
+  background: linear-gradient(135deg, #6b0f1a, #b91372);
+  color: #f8d97a; border: 2px solid #f8d97a;
+  padding: 10px 36px; font-size: 16px; font-weight: bold;
+  border-radius: 8px; cursor: pointer;
+  letter-spacing: 2px;
+}
+.stats-close-btn:hover {
+  background: linear-gradient(135deg, #b91372, #6b0f1a);
+  box-shadow: 0 0 20px rgba(248,217,122,0.5);
+}
+.stats-reset-btn {
+  display: block;
+  margin: 10px auto 0;
+  background: transparent;
+  color: #ff6060; border: 1px solid #ff6060;
+  padding: 6px 20px; font-size: 12px;
+  border-radius: 6px; cursor: pointer;
+}
+.stats-reset-btn:hover { background: rgba(255,96,96,0.15); }
+.stats-btn-home {
+  background: linear-gradient(135deg, #0a1a2e, #05153e);
+  color: #f8d97a; border: 2px solid #f8d97a;
+  padding: 8px 20px; font-size: 14px; font-weight: bold;
+  border-radius: 8px; cursor: pointer;
+  margin-left: 8px;
+  letter-spacing: 1px;
+}
+.stats-btn-home:hover {
+  background: linear-gradient(135deg, #1a3a5e, #0a2a4e);
+  box-shadow: 0 0 15px rgba(248,217,122,0.5);
+}
+/* 倒计时样式 */
+#turn-timer {
+  font-size: 13px;
+  color: #ff6666;
+  margin-left: 8px;
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(255,0,0,0.1);
+  border: 1px solid rgba(255,0,0,0.3);
+  animation: timerPulse 1s ease-in-out infinite;
+}
+#turn-timer.warning {
+  color: #ff0000;
+  background: rgba(255,0,0,0.25);
+  border-color: rgba(255,0,0,0.6);
+  animation: timerUrgent 0.5s ease-in-out infinite;
+}
+@keyframes timerPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+@keyframes timerUrgent {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.05); }
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+/* 支付iframe容器 */
+#pay-iframe-container { position: relative; }
+#pay-loading { position: absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#fff; }
+</style>
+</head>
+<body>
+
+<!-- 粒子容器 -->
+<canvas id="particles"></canvas>
+
+<!-- ======================================================
+     主页
+====================================================== -->
+<div id="page-home" class="page active">
+  <!-- 背景视频 -->
+  <video id="home-video-bg" autoplay muted loop playsinline
+    x5-video-player-type="h5"
+    x5-video-player-fullscreen="true"
+    x5-playsinline="true"
+    webkit-playsinline="true"
+    style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0;">
+    <source src="b302c9894d9048244b6c0fc5a954d2a8.mp4" type="video/mp4">
+  </video>
+  <!-- 视频加载失败 / autoplay被阻止时的静态背景 -->
+  <div id="home-video-fallback"
+    style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;display:none;
+    background: linear-gradient(160deg,#040010 0%,#0d0320 15%,#150830 30%,#0a1025 50%,#1a0628 70%,#0d0318 100%);">
+  </div>
+  <!-- 纯CSS星光粒子（叠加在视频上） -->
+  <span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span><span class="star-particle"></span>
+  <!-- JS魔法粒子层 -->
+  <div class="magic-particles-layer" id="magic-particles"></div>
+  <!-- 魔法符文 -->
+  <span class="witch-rune">⛧</span><span class="witch-rune">☽</span><span class="witch-rune">☿</span><span class="witch-rune">⛤</span>
+  <div class="home-overlay"></div>
+  <div class="home-fog"></div>
+  <div class="moon"></div>
+  <!-- 蜘蛛网 -->
+  <svg class="spider-web" style="position:absolute;top:170px;left:40px;width:120px;height:100px;z-index:3;pointer-events:none;" viewBox="0 0 120 100">
+    <line x1="60" y1="0" x2="40" y2="100" stroke="rgba(200,180,220,0.15)" stroke-width="0.8"/>
+    <line x1="60" y1="0" x2="80" y2="100" stroke="rgba(200,180,220,0.15)" stroke-width="0.8"/>
+    <line x1="60" y1="0" x2="60" y2="100" stroke="rgba(200,180,220,0.1)" stroke-width="0.5"/>
+    <path d="M40 100 Q55 60 80 100" fill="none" stroke="rgba(200,180,220,0.2)" stroke-width="0.6"/>
+    <path d="M40 70 Q60 55 80 70" fill="none" stroke="rgba(200,180,220,0.15)" stroke-width="0.5"/>
+    <path d="M40 40 Q60 30 80 40" fill="none" stroke="rgba(200,180,220,0.1)" stroke-width="0.4"/>
+  </svg>
+  <div class="witch-spider">🕷</div>
+  <h1 class="home-title">女巫的毒药</h1>
+  <p class="home-subtitle">一场命运的赌局·谁将饮下那杯毒酒</p>
+    <div class="wallet-bar">
+      <span class="wallet-coin">💰</span>
+      <span class="wallet-amount" id="wallet-display">10000</span>
+      <span class="wallet-cost">入场费 <b style="color:#f8d97a">20</b> 积分/局<br>赢 +350 · 输 -350</span>
+      <button class="recharge-btn-home" onclick="showRecharge()">💎 充值</button>
+      <button class="stats-btn-home" onclick="showStats()">📊 战绩</button>
+      <button class="redeem-btn-home" onclick="showRedeemModal()" style="background:linear-gradient(135deg,#6060c0,#4040a0);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:bold;cursor:pointer;margin-left:6px;">🎫 兑换码</button>
+    </div>
+  <!-- 背景视频 -->
+  <video id="home-video-bg" autoplay muted loop playsinline preload="auto"
+    style="position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0.35;">
+    <source src="b302c9894d9048244b6c0fc5a954d2a8.mp4" type="video/mp4">
+  </video>
+  <!-- 自定义设置区域（主页） -->
+  <div class="custom-setup" id="custom-setup">
+    <h3>⚙️ 自定义设置</h3>
+    <div style="margin-bottom:16px;">
+      <label style="color:#a080c0;font-size:12px;display:block;margin-bottom:5px;">你的名字</label>
+      <input type="text" class="name-input" id="custom-name" placeholder="输入你的名字..." maxlength="8" value="">
+    </div>
+    <div>
+      <label style="color:#a080c0;font-size:12px;display:block;margin-bottom:5px;">选择头像</label>
+      <div class="avatar-grid" id="avatar-grid">
+        <!-- 动态填充头像选项 -->
+      </div>
+    </div>
+  </div>
+  <div class="home-btn-area">
+    <button class="btn-witch" id="btn-start-game" onclick="startGameFlow()">🔮 开始游戏</button>
+  </div>
+  <div class="home-cauldron">🪄</div>
+</div>
+
+<!-- ======================================================
+     规则页
+====================================================== -->
+<div id="page-rules" class="page">
+  <h2 class="rules-title">📜 游戏规则</h2>
+  <div class="rules-images-wrap">
+    <img src="rule1.jpg" alt="游戏规则1" onerror="this.style.display='none'">
+    <img src="rule2.jpg" alt="游戏规则2" onerror="this.style.display='none'">
+  </div>
+  <div class="rules-summary">
+    <h3>🃏 卡牌说明（5×5共25张）</h3>
+    <div class="rules-card-grid" id="rules-card-list"></div>
+    <br>
+    <h3>🛡 玩法说明</h3>
+    ① 4名玩家轮流翻牌，每回合翻开1张牌执行效果<br>
+    ② <b style="color:#ff4444">翻到毒药</b>：立即出局（手持解毒剂可免疫）<br>
+    ③ <b style="color:#60d0ff">放大镜</b>：可偷看任意1张未翻牌<br>
+    ④ <b style="color:#a0e080">能量饮料</b>：再翻1张额外的牌<br>
+    ⑤ <b style="color:#ffe060">曲奇饼干</b>：下一张牌分数翻倍<br>
+    ⑥ <b style="color:#b0ffa0">魔法草药</b>：从道具堆随机获得1张道具牌（可能是解毒剂！）<br>
+    ⑦ <b style="color:#ffd700">🪙 5分兑道具</b>：自己回合消耗5积分，随机从道具堆兑换1张道具牌（也可能是解毒剂！）<br>
+    ⑧ <b style="color:#80ffdd">解毒剂</b>（道具牌）：从道具堆获得后放入手牌，使用时激活免疫效果，下次翻到毒药时自动解毒<br>
+    ⑨ 最后所有存活玩家，<b style="color:#f8d97a">得分最高者胜</b>！<br><br>
+    <h3>💰 积分系统</h3>
+    初始 10,000 积分 · 入场费 20 积分/局<br>
+    赢一局 <b style="color:#60ff90">+350 积分</b> · 输一局 <b style="color:#ff6060">-350 积分</b><br>
+    积分不足时可充值（¥6起）<br><br>
+    <h3>🧰 道具牌（每种3张，共8种）</h3>
+    手持道具牌可在自己回合使用，使用后消耗。<br>
+    ① <b style="color:#80ffdd">解毒剂</b>：翻到毒药时免出局一次<br>
+    ② <b style="color:#f8d97a">强运甘露</b>：摸道具堆顶2张，选1张加入手牌<br>
+    ③ <b style="color:#ff9090">妙手空空</b>：获得一名其他玩家的3点积分<br>
+    ④ <b style="color:#80c0ff">窥视</b>：查看3张食物牌<br>
+    ⑤ <b style="color:#c0a0ff">移形换影</b>：选择2张食物牌偷偷交换位置<br>
+    ⑥ <b style="color:#ffa060">力量药剂</b>：选择一名其他玩家，帮他翻1张食物牌，效果由他承担<br>
+    ⑦ <b style="color:#ffe060">点石成金</b>：立即获得7点积分<br>
+    ⑧ <b style="color:#60ff90">护身符</b>：下个回合开始前不会出局<br>
+    翻到<b>魔法草药</b>或花费<b>5积分兑换</b>可随机获得道具牌
+  </div>
+  <button class="btn-witch" onclick="showMatch()" style="margin-bottom:20px">⚔️ 匹配对手</button>
+</div>
+
+<!-- ======================================================
+     匹配页
+====================================================== -->
+<div id="page-match" class="page">
+  <h2 class="match-title">🔍 正在匹配玩家</h2>
+  <div class="match-players" id="match-players">
+    <!-- 动态填充 -->
+  </div>
+  <div class="match-progress"><div class="match-progress-bar" id="match-bar"></div></div>
+  <div class="match-status" id="match-status">正在搜索对手<span class="match-waiting-dots"></span></div>
+  <button class="btn-witch" id="btn-skip-match" onclick="startGameNow()" style="display:none">⚡ 立即开始</button>
+</div>
+
+<!-- ======================================================
+     游戏主体
+====================================================== -->
+<div id="page-game" class="page">
+  <div class="game-header">
+    <div class="game-title-small">🧙 女巫的毒药</div>
+    <div class="game-round-info" id="round-info">第 1 轮 · 回合 1</div>
+    <div style="color:#f8d97a;font-size:14px;">💰 <span id="game-wallet-display">10000</span></div>
+    <button class="game-btn-sm" onclick="showRulesFromGame()">📜规则</button>
+    <span id="turn-indicator" style="font-size:12px;color:#f8d97a;margin-left:10px;"></span>
+    <span id="turn-timer" style="font-size:13px;color:#ff6666;margin-left:8px;font-weight:bold;display:none;">⏰ 30秒</span>
+  </div>
+  <div class="game-body">
+    <!-- 左：玩家列表 -->
+    <div class="players-panel" id="players-panel"></div>
+
+    <!-- 中：卡牌区 -->
+    <div class="cards-area">
+      <div class="card-grid-wrap">
+        <div class="card-grid" id="card-grid"></div>
+      </div>
+
+    </div>
+
+    <!-- 右：道具牌 -->
+    <div class="tools-panel">
+      <div class="tools-title">道具堆</div>
+      <div class="tool-pile" id="tool-pile"></div>
+      <div class="my-tools-label">我的道具</div>
+      <div class="my-tools-area" id="my-tools-area"></div>
+      <!-- 5积分兑换道具 -->
+      <button class="redeem-btn" id="btn-redeem" onclick="redeemTool()" title="消耗5积分随机兑换1张道具牌（可能是解毒剂！）">
+        🪙 5分兑道具
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================
+     结算页
+====================================================== -->
+<div id="page-result" class="page">
+  <div class="result-title" id="result-title">游戏结束</div>
+  <div class="result-subtitle" id="result-subtitle"></div>
+  <div class="result-rankings" id="result-rankings"></div>
+  <div class="result-btns">
+    <button class="btn-witch" onclick="backHome()">🏠 返回主页</button>
+    <button class="btn-witch" onclick="playAgain()">🔄 再玩一局</button>
+  </div>
+</div>
+
+<!-- 个人战绩弹窗 -->
+<div class="stats-modal" id="stats-modal">
+  <div class="stats-box">
+    <h3>📊 个人战绩</h3>
+    <div class="stats-row">
+      <span class="stats-label">总对局</span>
+      <span class="stats-value" id="stats-total">0</span>
+    </div>
+    <div class="stats-row">
+      <span class="stats-label">胜利 🏆</span>
+      <span class="stats-value win" id="stats-wins">0</span>
+    </div>
+    <div class="stats-row">
+      <span class="stats-label">存活 🎯</span>
+      <span class="stats-value" id="stats-survivals">0</span>
+    </div>
+    <div class="stats-row">
+      <span class="stats-label">出局 ☠</span>
+      <span class="stats-value lose" id="stats-eliminations">0</span>
+    </div>
+    <div class="stats-row">
+      <span class="stats-label">胜率</span>
+      <span class="stats-value" id="stats-winrate">0%</span>
+    </div>
+    <div class="stats-row">
+      <span class="stats-label">累计得分</span>
+      <span class="stats-value" id="stats-total-score">0</span>
+    </div>
+    <div class="stats-row">
+      <span class="stats-label">最高单局得分</span>
+      <span class="stats-value" id="stats-highest-score">0</span>
+    </div>
+    <div class="stats-row">
+      <span class="stats-label">累计积分变化</span>
+      <span class="stats-value" id="stats-wallet-change">0</span>
+    </div>
+    <div class="stats-row">
+      <span class="stats-label">最佳排名</span>
+      <span class="stats-value" id="stats-best-rank">-</span>
+    </div>
+    <div class="stats-row">
+      <span class="stats-label">首次游戏</span>
+      <span class="stats-value" id="stats-first-played" style="font-size:12px;">-</span>
+    </div>
+    <div class="stats-row">
+      <span class="stats-label">最近游戏</span>
+      <span class="stats-value" id="stats-last-played" style="font-size:12px;">-</span>
+    </div>
+    <button class="stats-close-btn" onclick="closeStats()">关闭</button>
+    <button class="stats-reset-btn" onclick="resetStats()">重置战绩</button>
+  </div>
+</div>
+
+<!-- 特效层 -->
+<div class="effect-overlay" id="effect-overlay">
+  <div class="effect-toast" id="effect-toast">
+    <div class="effect-icon" id="effect-icon"></div>
+    <div class="effect-name" id="effect-name"></div>
+    <div class="effect-desc" id="effect-desc"></div>
+  </div>
+</div>
+
+<!-- 目标选择弹窗 -->
+<div class="pick-modal" id="pick-modal">
+  <div class="pick-box">
+    <h3 id="pick-title">选择目标</h3>
+    <div class="pick-options" id="pick-options"></div>
+  </div>
+</div>
+
+<!-- 充值弹窗 -->
+<div class="recharge-modal" id="recharge-modal">
+  <div class="recharge-box">
+    <h3>💰 积分不足</h3>
+    <p>当前余额：<b style="color:#f8d97a;" id="recharge-current">0</b> 积分<br>需要至少 <b style="color:#ff6060">20</b> 积分才能开始游戏</p>
+    <div class="recharge-options">
+      <div class="recharge-opt" onclick="doRecharge(500,'¥6')">
+        <span>🪙 500 积分</span>
+        <span class="opt-amount">+500</span>
+        <span class="opt-price">¥6</span>
+      </div>
+      <div class="recharge-opt" onclick="doRecharge(1200,'¥12')">
+        <span>🪙 1200 积分</span>
+        <span class="opt-amount">+1200</span>
+        <span class="opt-price">¥12</span>
+      </div>
+      <div class="recharge-opt" onclick="doRecharge(3000,'¥25')">
+        <span>🪙 3000 积分</span>
+        <span class="opt-amount">+3000</span>
+        <span class="opt-price">¥25</span>
+      </div>
+      <div class="recharge-opt" onclick="doRecharge(8000,'¥60')">
+        <span>🪙 8000 积分</span>
+        <span class="opt-amount">+8000</span>
+        <span class="opt-price">¥60</span>
+      </div>
+    </div>
+    <button class="recharge-close" onclick="closeRecharge()">✕ 关闭</button>
+  </div>
+</div>
+
+<!-- 自动支付弹窗（全自动，无需人工审核） -->
+<div class="recharge-modal" id="pay-modal">
+  <div class="recharge-box" style="max-width:390px;">
+    <h3 id="pay-title">💳 扫码支付</h3>
+    <p style="color:#f8d97a;font-size:15px;" id="pay-info">正在生成支付二维码...</p>
+    <!-- 支付iframe区域 -->
+    <div style="margin:12px auto;border-radius:12px;overflow:hidden;box-shadow:0 0 20px rgba(200,160,32,0.3);background:#fff;min-height:300px;text-align:center;padding:20px;" id="pay-iframe-container">
+      <!-- 手动扫码支付：直接显示二维码图片 -->
+      <img src="pay_qrcode.png" alt="扫码支付" style="max-width:260px;width:100%;display:block;margin:0 auto 12px;" onerror="this.style.display='none';document.getElementById('pay-fallback-text').style.display='block';">
+      <p id="pay-fallback-text" style="display:none;color:#aaa;padding:20px;font-size:14px;">二维码加载失败，请联系客服</p>
+      <p style="color:#c8a020;font-size:13px;margin:0;">扫码支付后，联系客服发放积分</p>
+      <!-- 自动支付（Cloudflare Worker 部署后取消注释）
+      <div id="pay-loading" style="padding:60px 20px;text-align:center;">
+        <div style="color:#888;font-size:13px;margin-bottom:12px;">⏳ 正在连接支付服务...</div>
+        <div style="width:40px;height:40px;border:3px solid #c8a020;border-top-color:transparent;border-radius:50%;margin:0 auto;animation:spin 1s linear infinite;"></div>
+      </div>
+      <iframe id="pay-iframe" style="display:none;width:100%;height:380px;border:none;"></iframe>
+      -->
+    </div>
+    <p style="color:#4ec94e;font-size:13px;margin-top:8px;" id="pay-auto-msg">🤖 <b>全自动到账</b>：付款后无需任何操作，积分自动到账！</p>
+    <button class="recharge-close" onclick="closePayModal()" style="margin-top:6px;">✕ 关闭</button>
+  </div>
+</div>
+
+<!-- 兑换码弹窗 -->
+<div class="recharge-modal" id="redeem-modal">
+  <div class="recharge-box" style="max-width:360px;">
+    <h3>🎫 兑换码</h3>
+    <p style="color:#a0c0ff;font-size:13px;margin-bottom:14px;">请输入客服提供的兑换码<br>兑换后积分将立即到账</p>
+    <input id="redeem-input" type="text" placeholder="输入兑换码（格式：WP-XXXX-XXXX-XXXX）" style="width:90%;padding:10px 12px;border:1px solid #6060a0;border-radius:8px;background:rgba(0,0,0,0.5);color:#f0d0ff;font-size:14px;letter-spacing:1px;text-align:center;outline:none;margin-bottom:14px;">
+    <div id="redeem-msg" style="font-size:13px;min-height:20px;margin-bottom:10px;"></div>
+    <div style="display:flex;gap:12px;justify-content:center;">
+      <button class="recharge-close" onclick="closeRedeemModal()">取 消</button>
+      <button style="background:linear-gradient(135deg,#6060c0,#4040a0);color:#fff;border:none;border-radius:8px;padding:10px 28px;font-size:15px;font-weight:bold;cursor:pointer;" onclick="doRedeemCode()">✅ 兑 换</button>
+    </div>
+  </div>
+</div>
+
+<!-- 转盘抽先手 -->
+<div class="spinner-modal" id="spinner-modal">
+  <div class="spinner-title">🎲 决定先手顺序</div>
+  <div style="position:relative;width:260px;height:260px;">
+    <div class="spinner-arrow">▼</div>
+    <div class="spinner-wheel" id="spinner-wheel">
+      <div class="spinner-p1" id="spinner-p1"></div>
+      <div class="spinner-p2" id="spinner-p2"></div>
+      <div class="spinner-p3" id="spinner-p3"></div>
+      <div class="spinner-p4" id="spinner-p4"></div>
+    </div>
+  </div>
+  <div class="spinner-result" id="spinner-result"></div>
+</div>
+
+<script>
+// ============================================================
+// 数据定义
+// ============================================================
+
+// 5×5格子牌（25张）
+// 注意：解毒剂已移出格子牌，改为道具牌（3张），可通过5积分兑换或魔法草药抽取获得
+// 图片映射：基于逐张读取卡面文字确认（v6 最终修正版）
+var GRID_CARDS = [
+  { id:'donut',    name:'甜甜圈',   count:3, icon:'🍩', img:'cards/grid_donut.jpg',
+    effect:'score', points:3, desc:'+3 分', color:'#f0c060' },
+  { id:'energy',   name:'能量饮料', count:2, icon:'⚡', img:'cards/grid_energy.jpg',
+    effect:'extra_flip', desc:'立即再翻1张牌！', color:'#60d0ff' },
+  { id:'apple',    name:'苹果',     count:8, icon:'🍎', img:'cards/grid_apple.jpg',
+    effect:'score', points:1, desc:'+1 分', color:'#80ff80' },
+  { id:'poison',   name:'女巫的毒药',count:3, icon:'☠️', img:'cards/grid_poison.jpg',
+    effect:'poison',     desc:'中毒！立即出局（解毒剂可解救）', color:'#ff4444', danger:true },
+  { id:'candy',    name:'糖果',     count:1, icon:'🍬', img:'cards/grid_candy.jpg',
+    effect:'score', points:5, desc:'+5 分！大奖！', color:'#ffcc00' },
+  { id:'pie',      name:'苹果派',   count:2, icon:'🥧', img:'cards/grid_applepie.jpg',
+    effect:'score', points:2, desc:'+2 分', color:'#f0c060' },
+  { id:'magnifier',name:'放大镜',   count:2, icon:'🔍', img:'cards/grid_magnifier.jpg',
+    effect:'peek',       desc:'偷看任意1张未翻的牌', color:'#80c0ff' },
+  { id:'cookie',   name:'曲奇饼干', count:2, icon:'🍪', img:'cards/grid_cookie.jpg',
+    effect:'double_next',desc:'下一张牌分数翻倍！', color:'#ffdd80' },
+  { id:'herb',     name:'魔法草药', count:2, icon:'🌿', img:'cards/grid_herb.jpg',
+    effect:'draw_tool',  desc:'从道具堆随机获得1张道具牌（可能是解毒剂！）', color:'#80ff80' },
+];
+// 格子牌总数：3+2+8+3+1+2+2+2+2 = 25 ✓
+
+// 道具牌（9种，每种3张）
+// 解毒剂在道具堆中，可通过5积分兑换或魔法草药抽取获得
+// 道具牌（每种3张）— 名称和效果来自卡面原文
+var TOOL_CARDS = [
+  { id:'antidote',   name:'解毒剂',   icon:'🧪', img:'cards/tool_antidote.jpg',
+    effect:'antidote', desc:'当你翻到"女巫的毒药"时，免出局一次' },
+  { id:'qiangyun',   name:'强运甘露', icon:'🍷', img:'cards/tool_lucky.jpg',
+    effect:'draw_2_pick_1', desc:'摸取道具牌堆顶2张牌，选择1张加入手牌，另1张放回牌堆底' },
+  { id:'miaoshou',   name:'妙手空空', icon:'✋', img:'cards/tool_pickpocket.jpg',
+    effect:'steal_3', desc:'获得一名其他玩家的3点积分' },
+  { id:'kuishi',     name:'窥视',     icon:'👁', img:'cards/tool_peek.jpg',
+    effect:'peek_3', desc:'查看3张食物牌' },
+  { id:'yixing',     name:'移形换影', icon:'👤', img:'cards/tool_swap.jpg',
+    effect:'swap_2', desc:'选择2张食物牌偷偷交换位置' },
+  { id:'liliang',    name:'力量药剂', icon:'💪', img:'cards/tool_power.jpg',
+    effect:'force_flip', desc:'选择一名其他玩家，你来帮他翻开一张食物牌，效果由他承担' },
+  { id:'dianshi',    name:'点石成金', icon:'✨', img:'cards/tool_gold.jpg',
+    effect:'score_7', desc:'立即获得7点积分' },
+  { id:'hushen',     name:'护身符',   icon:'🔖', img:'cards/tool_amulet.jpg',
+    effect:'protect', desc:'在你的下一个回合开始前，不会出局' },
+];
+
+// ============================================================
+// 粒子系统
+// ============================================================
+(function initParticles(){
+  var canvas = document.getElementById('particles');
+  var ctx = canvas.getContext('2d');
+  var W, H, particles = [];
+  function resize(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
+  window.addEventListener('resize', resize); resize();
+  for(var i=0;i<60;i++){
+    particles.push({
+      x: Math.random()*1920, y: Math.random()*1080,
+      r: Math.random()*2+0.5,
+      vx: (Math.random()-0.5)*0.3, vy: -Math.random()*0.4-0.1,
+      alpha: Math.random(),
+      color: Math.random()>0.5 ? 'rgba(185,19,114,' : 'rgba(248,217,122,'
+    });
+  }
+  function animate(){
+    requestAnimationFrame(animate);
+    ctx.clearRect(0,0,W,H);
+    particles.forEach(function(p){
+      p.x+=p.vx; p.y+=p.vy;
+      p.alpha+=0.005;
+      if(p.alpha>1){p.alpha=0;p.y=H+5;p.x=Math.random()*W;}
+      if(p.y<-5){p.y=H+5;p.x=Math.random()*W;}
+      ctx.beginPath();
+      ctx.arc(p.x%W, p.y, p.r, 0, Math.PI*2);
+      ctx.fillStyle = p.color+Math.min(p.alpha,0.6)+')';
+      ctx.fill();
+    });
+  }
+  animate();
+})();
+
+// ============================================================
+// 页面切换
+// ============================================================
+function showPage(id){
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+}
+
+function showRules(){
+  buildRulesList();
+  showPage('page-rules');
+}
+function showRulesFromGame(){ showPage('page-rules'); }
+function backHome(){
+  updateWalletDisplay();
+  showPage('page-home');
+}
+
+function buildRulesList(){
+  var el = document.getElementById('rules-card-list');
+  el.innerHTML = '';
+  GRID_CARDS.forEach(function(c){
+    el.innerHTML += '<div class="rules-card-item">'+c.icon+' '+c.name+'<br><span class="count">×'+c.count+'</span><br><span style="color:'+c.color+';font-size:11px;">'+c.desc+'</span></div>';
+  });
+}
+
+// ============================================================
+// 匹配系统
+// ============================================================
+var PLAYER_NAMES = ['玩家_'+Math.floor(Math.random()*9000+1000),'神秘旅者','影子巫师','毒药猎人','夜影刺客','星辰法师','幽灵骑士','炼金师'];
+var AI_AVATARS = ['🧙','🧝','🧛','🧟','👻','🕵','🦹','🧜'];
+
+// 自定义玩家设置（从本地加载，刷新不丢失）
+var CUSTOM_NAME = localStorage.getItem('witch_name') || '';
+var CUSTOM_AVATAR_FILE = localStorage.getItem('witch_avatar') || '';
+
+// 可选用头像列表
+var AVATAR_FILES = [
+  '08A834A7F5213F67B4188C250D3750FA.jpg',
+  '0D2D2672246EF8FD0A3AE7AB6A622754.jpg',
+  '0FF4179BA9793C3809ECC90E2371EC6D.jpg',
+  '1309A183047A80C25D2A5BFE138597C4.jpg',
+  '73C8684BC52C1B93B132195CB1DF634E.jpg',
+  '9AC905E6490747DED697EB2B404D70F9.jpg',
+  'DBF66C2B47ABEC0EE0F4ADD814E32F.jpg',
+  'E27918A0351A69E7B3799ED587CD6EC6.jpg',
+  'F0E4D3D28767A5976FE8E802932CEA4E.jpg'
+];
+
+// ============================================================
+// 主页初始化：设置头像网格和名字输入（页面加载时运行）
+// ============================================================
+(function initHomeCustomSetup(){
+  var avatarGrid = document.getElementById('avatar-grid');
+  if(!avatarGrid) return;
+
+  AVATAR_FILES.forEach(function(fname){
+    var img = document.createElement('img');
+    img.src = 'avatars/' + fname;
+    img.className = 'avatar-option';
+    img.onerror = function(){
+      img.style.display = 'none';
+    };
+    img.onclick = function(){
+      CUSTOM_AVATAR_FILE = fname;
+      localStorage.setItem('witch_avatar', fname);
+      avatarGrid.querySelectorAll('.avatar-option').forEach(function(el){ el.classList.remove('selected'); });
+      img.classList.add('selected');
+    };
+    avatarGrid.appendChild(img);
+  });
+
+  // 设置自定义名字
+  var nameInput = document.getElementById('custom-name');
+  nameInput.value = CUSTOM_NAME || ('玩家_'+Math.floor(Math.random()*9000+1000));
+  nameInput.oninput = function(){
+    CUSTOM_NAME = nameInput.value.trim();
+    localStorage.setItem('witch_name', CUSTOM_NAME);
+    // 切换到该用户的独立积分
+    loadWalletForUser();
+  };
+  CUSTOM_NAME = nameInput.value.trim();
+  localStorage.setItem('witch_name', CUSTOM_NAME);
+
+  // 默认选中第一个头像
+  if(!CUSTOM_AVATAR_FILE && AVATAR_FILES.length > 0){
+    CUSTOM_AVATAR_FILE = AVATAR_FILES[0];
+    var first = avatarGrid.querySelector('.avatar-option');
+    if(first) first.classList.add('selected');
+  }
+
+  // 加载本地战绩
+  loadPlayerStats();
+})();
+
+// 头像渲染辅助：type: 'card'玩家卡 | 'match'匹配页 | 'spinner'转盘 | 'result'结算 | 'picker'选择器
+function renderAvatarHTML(p, type){
+  if(p.avatarFile){
+    var size = '';
+    if(type==='card') size = 'pc-avatar-img';
+    else if(type==='match') size = 'match-avatar-img';
+    else if(type==='spinner') size = 'spinner-avatar-img';
+    else if(type==='result') size = 'result-avatar-img';
+    else if(type==='picker') size = 'picker-avatar-img';
+    var src = 'avatars/' + p.avatarFile;
+    var fb = p.avatar || '🧙‍♀️';
+    return '<img src="'+src+'" class="'+size+'" style="object-fit:cover;" onerror="this.outerHTML=\''+fb+'\'">';
+  }
+  return p.avatar || '🧙‍♀️';
+}
+
+var matchedPlayers = [];
+var matchTimer = null;
+
+// ============================================================
+// 钱包系统
+// ============================================================
+function updateWalletDisplay(){
+  var el1 = document.getElementById('wallet-display');
+  var el2 = document.getElementById('game-wallet-display');
+  if(el1) el1.textContent = G.wallet;
+  if(el2) el2.textContent = G.wallet;
+  saveWalletForUser();
+}
+
+// ---- 用户独立积分系统（按昵称存储） ----
+function getWalletKey(){
+  var name = (typeof CUSTOM_NAME !== 'undefined' && CUSTOM_NAME) ? CUSTOM_NAME : (localStorage.getItem('witch_name') || '');
+  if(!name){ return 'witch_wallet__guest'; }
+  return 'witch_wallet__' + name;
+}
+function saveWalletForUser(){
+  try{ localStorage.setItem(getWalletKey(), G.wallet); }catch(e){}
+}
+function loadWalletForUser(){
+  var key = getWalletKey();
+  var saved = localStorage.getItem(key);
+  if(saved !== null && !isNaN(parseInt(saved))){
+    G.wallet = parseInt(saved);
+  } else {
+    G.wallet = 10000; // 新用户初始10000
+    saveWalletForUser();
+  }
+  updateWalletDisplay();
+}
+
+function startGameFlow(){
+  if(G.wallet < G.entryFee){
+    showRecharge();
+    return;
+  }
+  // 扣入场费
+  G.wallet -= G.entryFee;
+  updateWalletDisplay();
+  showWalletAnim(-G.entryFee);
+  showRules();
+}
+
+function showWalletAnim(amount){
+  var el = document.getElementById('wallet-display');
+  if(!el) return;
+  var span = document.createElement('span');
+  span.className = 'wallet-delta ' + (amount >= 0 ? 'plus' : 'minus');
+  span.textContent = (amount >= 0 ? '+' : '') + amount;
+  el.parentNode.appendChild(span);
+  setTimeout(function(){ if(span.parentNode) span.remove(); }, 1200);
+}
+
+function showRecharge(){
+  document.getElementById('recharge-current').textContent = G.wallet;
+  document.getElementById('recharge-modal').classList.add('show');
+}
+
+function closeRecharge(){
+  document.getElementById('recharge-modal').classList.remove('show');
+}
+
+// ============================================================
+// 自动支付系统（Cloudflare Workers + 码支付）
+// ============================================================
+// ⚠️ 部署Worker后将下方URL替换为实际Worker地址
+var WORKER_URL = 'https://witch-poison.YOUR_SUBDOMAIN.workers.dev';
+
+var _payPendingPoints = 0; // 待发放的积分
+
+function doRecharge(amount, price){
+  closeRecharge();
+  // 获取玩家昵称
+  var me = G.players ? G.players.find(function(p){ return p.isMe; }) : null;
+  var playerName = me ? me.name : (typeof CUSTOM_NAME !== 'undefined' ? CUSTOM_NAME : '玩家');
+  
+  showPayModal(amount, price, playerName);
+}
+
+function showPayModal(amount, price, playerName){
+  var modal = document.getElementById('pay-modal');
+  if(!modal) return;
+  
+  document.getElementById('pay-title').textContent = '💳 充值 ' + amount + ' 积分';
+  document.getElementById('pay-info').textContent = '实付 ¥' + price;
+  document.getElementById('pay-auto-msg').style.display = 'block';
+  
+  // 重置iframe
+  var loading = document.getElementById('pay-loading');
+  var iframe = document.getElementById('pay-iframe');
+  if(loading) loading.style.display = 'block';
+  if(iframe) iframe.style.display = 'none';
+  
+  modal.classList.add('show');
+  
+  // 确定支付类型：手机端微信，PC端支付宝
+  var payType = isMobile() ? 'wxpay' : 'alipay';
+  var amountKey = amount.toString(); // '6','12','25','60'
+  
+  // 加载支付iframe
+  var payUrl = WORKER_URL + '/pay?amount=' + amountKey + '&type=' + payType + '&player=' + encodeURIComponent(playerName);
+  
+  setTimeout(function(){
+    if(loading) loading.style.display = 'none';
+    if(iframe){
+      iframe.src = payUrl;
+      iframe.style.display = 'block';
+    }
+  }, 500);
+  
+  // 保存待发放积分
+  _payPendingPoints = amount;
+}
+
+function closePayModal(){
+  var modal = document.getElementById('pay-modal');
+  if(modal) modal.classList.remove('show');
+  // 清空iframe防止后台继续轮询
+  var iframe = document.getElementById('pay-iframe');
+  if(iframe) iframe.src = 'about:blank';
+}
+
+// 监听支付成功的postMessage
+window.addEventListener('message', function(event){
+  // 验证消息来源（支付成功通知）
+  if(!event.data || event.data.type !== 'payment_success') return;
+  
+  var points = event.data.points || _payPendingPoints;
+  
+  // 自动加积分
+  G.wallet += points;
+  try { saveWalletForUser(); } catch(e) {}
+  
+  // 更新UI
+  updateWalletDisplay();
+  
+  // 显示成功提示
+  var info = document.getElementById('pay-info');
+  if(info) info.textContent = '✅ 支付成功！+' + points + ' 积分已到账';
+  document.getElementById('pay-auto-msg').textContent = '✅ 积分已自动到账！可以关闭此窗口';
+  document.getElementById('pay-auto-msg').style.color = '#4ec94e';
+  document.getElementById('pay-title').textContent = '✅ 充值成功';
+  
+  _payPendingPoints = 0;
+});
+
+function isMobile(){
+  return /Android|iPhone|iPad|iPod|webOS/i.test(navigator.userAgent);
+}
+
+// ============================================================
+// 兑换码系统
+// ============================================================
+
+function showRedeemModal(){
+  var modal = document.getElementById('redeem-modal');
+  if(!modal) return;
+  // 清空输入和消息
+  var input = document.getElementById('redeem-input');
+  var msg = document.getElementById('redeem-msg');
+  if(input) input.value = '';
+  if(msg) msg.textContent = '';
+  modal.classList.add('show');
+  if(input) input.focus();
+}
+
+function closeRedeemModal(){
+  var modal = document.getElementById('redeem-modal');
+  if(modal) modal.classList.remove('show');
+}
+
+function doRedeemCode(){
+  var input = document.getElementById('redeem-input');
+  var msgEl = document.getElementById('redeem-msg');
+  if(!input || !msgEl) return;
+
+  var code = input.value.trim().toUpperCase();
+  if(!code){
+    msgEl.style.color = '#ff6666';
+    msgEl.textContent = '⚠️ 请输入兑换码';
+    return;
+  }
+
+  // 检查是否已使用（localStorage）
+  var used = JSON.parse(localStorage.getItem('witch_used_codes') || '[]');
+  if(used.indexOf(code) !== -1){
+    msgEl.style.color = '#ff6666';
+    msgEl.textContent = '⚠️ 该兑换码已使用过';
+    return;
+  }
+
+  // 验证兑换码（需要 confirmed_codes.js 中的 CONFIRMED_CODES 变量）
+  if(typeof CONFIRMED_CODES === 'undefined'){
+    msgEl.style.color = '#ff6666';
+    msgEl.textContent = '⚠️ 兑换码数据未加载，请联系客服';
+    return;
+  }
+
+  var info = CONFIRMED_CODES[code];
+  if(!info){
+    msgEl.style.color = '#ff6666';
+    msgEl.textContent = '⚠️ 兑换码无效或已过期';
+    return;
+  }
+
+  // 验证通过，加积分
+  var amount = info.amount || 0;
+  if(amount <= 0){
+    msgEl.style.color = '#ff6666';
+    msgEl.textContent = '⚠️ 兑换码金额异常，请联系客服';
+    return;
+  }
+
+  G.wallet += amount;
+  updateWalletDisplay();
+  showWalletAnim(amount);
+
+  // 记录已使用
+  used.push(code);
+  localStorage.setItem('witch_used_codes', JSON.stringify(used));
+
+  msgEl.style.color = '#80ff80';
+  msgEl.textContent = '🎉 兑换成功！+' + amount + ' 积分已到账';
+  setLog('🎫 使用兑换码成功，+' + amount + '积分');
+
+  // 2秒后自动关闭弹窗
+  setTimeout(closeRedeemModal, 2000);
+}
+
+// ============================================================
+// 匹配系统
+// ============================================================
+function showMatch(){
+  showPage('page-match');
+
+  // 从主页输入框读取最新名字
+  var nameInput = document.getElementById('custom-name');
+  if(nameInput) { CUSTOM_NAME = nameInput.value.trim() || ('玩家_'+Math.floor(Math.random()*9000+1000)); localStorage.setItem('witch_name', CUSTOM_NAME); }
+
+  matchedPlayers = [];
+  var container = document.getElementById('match-players');
+  container.innerHTML = '';
+  for(var i=0;i<4;i++){
+    var slot = document.createElement('div');
+    slot.className = 'match-player-slot';
+    slot.id = 'mslot-'+i;
+    slot.innerHTML = '<div style="font-size:40px;color:#333">?</div><div style="color:#444;font-size:12px">等待中...</div>';
+    container.appendChild(slot);
+  }
+  // 自己先进
+  setTimeout(function(){ fillMatchSlot(0, CUSTOM_NAME, '🧙‍♀️', false, true); }, 300);
+  var bar = document.getElementById('match-bar');
+  var prog = 0;
+  var barT = setInterval(function(){ prog=Math.min(prog+2,100); bar.style.width=prog+'%'; if(prog>=100)clearInterval(barT); }, 60);
+  var filledCount = 1;
+  var delays = [1200, 2100, 3000];
+  delays.forEach(function(delay, idx){
+    setTimeout(function(){
+      var isAI = Math.random()>0.4;
+      var aname = isAI ? ('AI_'+AI_AVATARS[(idx+1)%AI_AVATARS.length]) : PLAYER_NAMES[(idx+1)%PLAYER_NAMES.length];
+      fillMatchSlot(idx+1, aname, AI_AVATARS[(idx+1)%AI_AVATARS.length], isAI, false);
+      filledCount++;
+      if(filledCount===4){
+        document.getElementById('match-status').textContent = '匹配成功！即将开始...';
+        document.getElementById('btn-skip-match').style.display = 'inline-block';
+        matchTimer = setTimeout(startGameNow, 2000);
+      }
+    }, delay);
+  });
+}
+
+function fillMatchSlot(idx, name, avatar, isAI, isMe){
+  var slot = document.getElementById('mslot-'+idx);
+  if(!slot) return;
+  slot.className = 'match-player-slot filled' + (isMe?' me':'');
+  // 玩家的自定义头像
+  var avHtml = avatar;
+  if(isMe && CUSTOM_AVATAR_FILE){
+    avHtml = '<img src="avatars/'+CUSTOM_AVATAR_FILE+'" class="match-avatar-img" style="object-fit:cover;" onerror="this.outerHTML=\''+avatar+'\'">';
+  }
+  slot.innerHTML =
+    '<div class="match-avatar">'+avHtml+'</div>'+
+    '<div class="match-name">'+(name.length>8?name.slice(0,8)+'..':name)+'</div>'+
+    '<div class="match-tag '+(isAI?'ai':'')+'>'+(isAI?'AI机器人':'真实玩家')+'</div>';
+  matchedPlayers.push({ name:name, avatar:avatar, isAI:isAI, isMe:isMe });
+}
+
+function startGameNow(){
+  if(matchTimer) clearTimeout(matchTimer);
+  // 确保读取最新的自定义名字
+  var nameInput = document.getElementById('custom-name');
+  if(nameInput) CUSTOM_NAME = nameInput.value.trim() || ('玩家_'+Math.floor(Math.random()*9000+1000));
+  while(matchedPlayers.length < 4){
+    var i = matchedPlayers.length;
+    matchedPlayers.push({ name:'AI_'+AI_AVATARS[i], avatar:AI_AVATARS[i], isAI:true, isMe:false });
+  }
+  initGame();
+  showSpinner(); // 先转盘再进游戏
+}
+
+// ============================================================
+// 转盘抽先手
+// ============================================================
+function showSpinner(){
+  var modal = document.getElementById('spinner-modal');
+  var wheel = document.getElementById('spinner-wheel');
+  var result = document.getElementById('spinner-result');
+
+  // 先把四个扇形填上玩家头像和名字
+  var quadrants = [
+    { divId:'spinner-p1', pos:'top',    p: G.players[0] },
+    { divId:'spinner-p2', pos:'right',  p: G.players[1] },
+    { divId:'spinner-p3', pos:'bottom', p: G.players[2] },
+    { divId:'spinner-p4', pos:'left',   p: G.players[3] },
+  ];
+  quadrants.forEach(function(q){
+    var el = document.getElementById(q.divId);
+    var avHtml = renderAvatarHTML(q.p, 'spinner');
+    // spinner-avatar 需要包含在span中定位，img也保留spinner-avatar类
+    el.innerHTML =
+      '<span class="spinner-avatar pos-'+q.pos+'">'+avHtml+'</span>'+
+      '<span class="spinner-name-tag pos-'+q.pos+'">'+(q.p.isMe?'你':q.p.name.slice(0,6))+'</span>';
+  });
+
+  modal.classList.add('show');
+  result.classList.remove('show');
+  result.textContent = '';
+
+  // 先归零
+  wheel.style.transition = 'none';
+  wheel.style.transform = 'rotate(0deg)';
+
+  // 随机目标玩家 0-3
+  var target = Math.floor(Math.random() * 4);
+  // 箭头在顶部(0°)，扇区 p1~p4 中心分别在 45°/135°/225°/315°
+  // 让 target 扇区中心旋转到箭头位置：rotation = (360 - sectorCenter + 360) % 360
+  var sectorCenter = 45 + target * 90;
+  var baseAngle = (360 - sectorCenter + 360) % 360;
+  var targetAngle = baseAngle + 360 * 5 + (Math.random() * 40 - 20);
+
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      wheel.style.transition = 'transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
+      wheel.style.transform = 'rotate(' + targetAngle + 'deg)';
+    });
+  });
+
+  setTimeout(function(){
+    var p = G.players[target];
+    var avHtml = renderAvatarHTML(p, 'picker');
+    result.innerHTML = '👉 ' + (p.isMe ? '你' : p.name) + '（<span style="vertical-align:middle">'+avHtml+'</span>）先手！';
+    result.classList.add('show');
+    G.currentPlayer = target;
+    setTimeout(function(){
+      modal.classList.remove('show');
+      G.currentPlayer = target; // 确保不受 initGame 影响
+      showPage('page-game');
+      renderGame();
+      // 先手行动
+      var curP = G.players[target];
+      var ind = document.getElementById('turn-indicator');
+      if(curP && curP.isAI && !curP.eliminated){
+        if(ind) ind.textContent = '⏳ ' + curP.name + ' 思考中...';
+        setLog('⏳ <span>'+curP.name+'</span> 思考中...');
+        setTimeout(function(){ doAITurn(curP); }, 500);
+      } else {
+        if(ind) ind.textContent = '⭐ 你的回合';
+        setLog('⭐ <span>轮到你了！</span>点击一张牌翻开（30秒内）');
+        startTurnTimer();
+      }
+    }, 1500);
+  }, 3200);
+}
+
+// ============================================================
+// 游戏状态
+// ============================================================
+var G = {
+  players: [],
+  cards: [],         // 25张格子牌
+  toolPile: [],      // 道具堆
+  currentPlayer: 0,
+  round: 1,
+  turn: 1,
+  doubleNext: false, // 曲奇饼干效果
+  extraFlip: false,  // 能量饮料效果
+  peekMode: false,   // 偷看模式
+  peekCount: 0,
+  swapMode: false,   // 移形换影交换模式
+  swapTargets: [],   // 交换目标索引
+  forceFlipTarget: null, // 力量药剂目标
+  pickCallback: null,
+  gameOver: false,
+  wallet: parseInt(localStorage.getItem('witch_wallet')) || 10000,     // 初始值，后续被 loadWalletForUser() 覆盖
+  entryFee: 20,      // 入场费
+  // 倒计时相关
+  turnTimer: null,    // 计时器ID
+  turnTimeLeft: 30,   // 剩余时间（秒）
+  timerRunning: false, // 计时器是否运行中
+};
+
+// 全局错误捕获：将JS错误显示到游戏日志
+window.addEventListener('error', function(e){
+  var logEl = document.getElementById('game-log');
+  var msg = '⚠️ JS错误：' + (e.message||e.error||'未知') + '（行'+ (e.lineno||'?') + '）';
+  if(logEl) logEl.innerHTML = msg;
+  // 如果是AI回合出错，强制推进
+  try { if(G && !G.gameOver) setTimeout(advanceTurn, 1000); } catch(ex){}
+});
+
+function cloneObj(src, extra){
+  var obj = {};
+  for(var k in src){ if(src.hasOwnProperty(k)) obj[k] = src[k]; }
+  if(extra){ for(var k in extra){ if(extra.hasOwnProperty(k)) obj[k] = extra[k]; } }
+  return obj;
+}
+
+function initGame(){
+  G.gameOver = false;
+  G.round = 1; G.turn = 1;
+  G.doubleNext = false; G.extraFlip = false; G.peekMode = false; G.peekCount = 0;
+  G.swapMode = false; G.swapTargets = []; G.swapDoneCb = null;
+  G.forceFlipTarget = null; G.forceFlipCb = null;
+  G.currentPlayer = 0;
+
+  // 初始化玩家
+  G.players = matchedPlayers.map(function(mp, i){
+    return {
+      name: mp.name, avatar: mp.avatar, isAI: mp.isAI, isMe: mp.isMe,
+      score: 3, eliminated: false, hasAntidote: false, shield: false,  // 初始3点积分
+      tools: [],
+      idx: i,
+      avatarFile: mp.isMe ? CUSTOM_AVATAR_FILE : null  // 玩家自定义头像
+    };
+  });
+
+  // 构造并洗牌格子牌
+  var deck = [];
+  GRID_CARDS.forEach(function(c){
+    for(var i=0;i<c.count;i++) deck.push(cloneObj(c));
+  });
+  shuffle(deck);
+  G.cards = deck.map(function(c,i){ return cloneObj(c, {gridIdx:i, flipped:false, used:false}); });
+
+  // 构造道具堆（每种3张，含解毒剂3张）
+  var tpile = [];
+  TOOL_CARDS.forEach(function(t){
+    for(var i=0;i<3;i++) tpile.push(cloneObj(t));
+  });
+  shuffle(tpile);
+  G.toolPile = tpile.map(function(t,i){ return cloneObj(t, {pileIdx:i, used:false}); });
+
+  renderGame();
+}
+
+function shuffle(arr){
+  for(var i=arr.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var tmp=arr[i]; arr[i]=arr[j]; arr[j]=tmp;
+  }
+}
+
+// ============================================================
+// 渲染游戏
+// ============================================================
+function renderGame(){
+  renderPlayers();
+  renderCardGrid();
+  renderToolPile();
+  renderMyTools();
+  updateRoundInfo();
+  updateMyTurnState();
+  updateRedeemBtn();
+}
+
+function renderPlayers(){
+  var panel = document.getElementById('players-panel');
+  panel.innerHTML = '';
+  G.players.forEach(function(p){
+    var div = document.createElement('div');
+    div.className = 'player-card' +
+      (p.idx===G.currentPlayer?' active-turn':'') +
+      (p.isMe?' me-player':'') +
+      (p.eliminated?' eliminated':'');
+    div.id = 'pcard-'+p.idx;
+    var avHtml = renderAvatarHTML(p, 'card');
+    div.innerHTML =
+      '<div class="pc-avatar">'+avHtml+'</div>'+
+      '<div class="pc-name">'+p.name.slice(0,8)+'</div>'+
+      '<div class="pc-score">'+p.score+'</div>'+
+      '<div class="pc-score-label">分数</div>'+
+      (p.hasAntidote?'<div class="pc-shield">🧪解毒剂</div>':'')+ 
+      (p.shield?'<div class="pc-shield">🛡防御</div>':'')+ 
+      '<div class="pc-status">'+(p.eliminated?'<span style="color:#ff4444">☠已出局</span>':(p.idx===G.currentPlayer?'<span style="color:#f8d97a">▶行动中</span>':''))+'</div>'+
+      (p.idx===G.currentPlayer?'<div class="turn-arrow">▼</div>':'');
+    panel.appendChild(div);
+  });
+}
+
+function renderCardGrid(){
+  var grid = document.getElementById('card-grid');
+  grid.innerHTML = '';
+  G.cards.forEach(function(card){
+    var div = document.createElement('div');
+    div.className = 'card-item' + (card.flipped?' flipped':'') + (card.used?' used':'');
+    div.id = 'card-'+card.gridIdx;
+    div.setAttribute('data-idx', card.gridIdx);
+    if(!card.flipped && !card.used) div.onclick = function(){ onCardClick(parseInt(this.getAttribute('data-idx'))); };
+    else div.classList.add('disabled');
+    var peekImg = card._peeked
+      ? '<img src="'+card.img+'" class="peek-reveal" style="width:100%;height:100%;object-fit:cover;border-radius:6px;border:2px solid #60ffaa;box-shadow:0 0 12px rgba(96,255,170,0.6);">'
+      : '<div class="card-back-pattern">🔮</div>';
+    div.innerHTML =
+      '<div class="card-inner">'+
+        '<div class="card-back">'+peekImg+'</div>'+
+        '<div class="card-face">'+
+          '<img src="'+card.img+'" onerror="this.style.display=\'none\'">'+
+          '<div class="card-face-name">'+card.icon+' '+card.name+'</div>'+
+        '</div>'+
+      '</div>';
+    grid.appendChild(div);
+  });
+}
+
+function renderToolPile(){
+  var pile = document.getElementById('tool-pile');
+  pile.innerHTML = '';
+  // 统计剩余道具牌总数
+  var remaining = G.toolPile.filter(function(t){ return !t.used; });
+  if(remaining.length===0){
+    pile.innerHTML = '<div style="color:#555;font-size:12px;text-align:center">道具已用完</div>';
+    return;
+  }
+  // 摞成一叠：显示牌背，层叠感
+  var total = remaining.length;
+  var topCard = remaining[remaining.length-1]; // 最上面那张作为牌背参考
+  var html = '<div class="tool-deck">';
+  // 底层阴影（层叠效果：下面叠5层虚影）
+  for(var i=Math.min(5, total-1); i>=1; i--){
+    html += '<div class="tool-deck-shadow" style="bottom:'+ (i*2) +'px; left:'+ (i*1.5) +'px;"></div>';
+  }
+  html +=
+    '<div class="tool-deck-top">'+
+      '<div class="tool-deck-back">🔮</div>'+
+      '<div class="tool-deck-total">'+total+'张</div>'+
+    '</div>';
+  html += '</div>';
+  pile.innerHTML = html;
+}
+
+function renderMyTools(){
+  var area = document.getElementById('my-tools-area');
+  area.innerHTML = '';
+  var me = G.players.find(function(p){ return p.isMe; });
+  if(!me || me.tools.length===0){
+    area.innerHTML = '<div style="color:#444;font-size:11px">暂无道具</div>';
+    return;
+  }
+  me.tools.forEach(function(t, i){
+    var btn = document.createElement('div');
+    btn.className = 'my-tool-badge';
+    btn.title = t.desc;
+    btn.textContent = t.icon+' '+t.name;
+    btn.onclick = function(){ useMyTool(i); };
+    area.appendChild(btn);
+  });
+}
+
+function updateRoundInfo(){
+  document.getElementById('round-info').textContent = '第 '+G.round+' 轮 · 回合 '+G.turn;
+}
+
+function updateMyTurnState(){
+  var grid = document.getElementById('card-grid');
+  var curP = G.players[G.currentPlayer];
+  if(curP && curP.isMe && !G.gameOver){
+    grid.classList.add('my-turn-active');
+  } else {
+    grid.classList.remove('my-turn-active');
+  }
+}
+
+function setLog(html){
+  var el = document.getElementById('game-log');
+  if(el) el.innerHTML = html;
+}
+
+// ============================================================
+// 卡牌点击处理
+// ============================================================
+function onCardClick(idx){
+  if(G.gameOver) return;
+  var curP = G.players[G.currentPlayer];
+  if(!curP || curP.eliminated) { advanceTurn(); return; }
+  if(!curP.isMe) return; // 玩家回合才能点击
+
+  // 移形换影：交换模式
+  if(G.swapMode){
+    doSwapSelect(idx);
+    return;
+  }
+
+  // 力量药剂：帮别人翻牌
+  if(G.forceFlipTarget){
+    doForceFlip(idx);
+    return;
+  }
+
+  // 目标选择模式（力量药剂等需要选牌的效果）
+  if(G.selectTargetCard){
+    G.selectTargetCard(idx);
+    return;
+  }
+
+  // 放大镜偷看模式
+  if(G.peekMode && G.peekCount > 0){
+    doPeek(idx, curP);
+    return;
+  }
+
+  var card = G.cards[idx];
+  if(!card || card.flipped || card.used) return;
+
+  // 清除计时器（玩家已出牌）
+  clearTurnTimer();
+
+  flipCard(idx, curP, function(){
+    applyCardEffect(card, curP, function(){
+      if(!G.extraFlip){
+        setTimeout(function(){ advanceTurn(); }, 400);
+      } else {
+        G.extraFlip = false;
+        setLog('<span>'+curP.name+'</span> 获得额外翻牌机会！继续点击一张牌');
+        // 不推进回合，等待再次点击
+      }
+    });
+  });
+}
+
+function flipCard(idx, player, cb){
+  var card = G.cards[idx];
+  if(!card) return;
+  card.flipped = true;
+  var el = document.getElementById('card-'+idx);
+  if(el){
+    el.classList.add('flipped');
+    el.classList.remove('target-select');
+    el.onclick = null;
+  }
+  // 闪光
+  var flash = document.createElement('div');
+  flash.className = 'card-flash';
+  document.body.appendChild(flash);
+  setTimeout(function(){ flash.remove(); }, 600);
+  if(cb) setTimeout(cb, 200);
+}
+
+// ============================================================
+// 卡牌效果
+// ============================================================
+function applyCardEffect(card, player, cb){
+  var effectMultiplier = G.doubleNext ? 2 : 1;
+  if(G.doubleNext && card.effect === 'score') G.doubleNext = false;
+
+  switch(card.effect){
+    case 'score':
+      var pts = (card.points || 1) * effectMultiplier;
+      player.score += pts;
+      showEffectToast(card.icon, card.name, card.desc + (effectMultiplier>1?' ×2=<b>+'+pts+'分</b>':''), card.color, false);
+      showScoreAnim('+'+pts, true);
+      updatePlayerUI(player);
+      setTimeout(cb, 1400);
+      break;
+
+    case 'poison':
+      if(player.hasAntidote){
+        player.hasAntidote = false;
+        showEffectToast('🧪', '解毒剂救命！', '解毒剂消耗，免疫毒药！', '#80ffdd', false);
+        renderMyTools();
+        updatePlayerUI(player);
+        setTimeout(cb, 1800);
+      } else if(player.shield){
+        player.shield = false;
+        showEffectToast('🛡', '防御成功！', '防御消耗，免疫毒药！', '#80c0ff', false);
+        updatePlayerUI(player);
+        setTimeout(cb, 1800);
+      } else {
+        // 中毒！出局
+        addPoisonSplash();
+        showEffectToast('☠️', '女巫的毒药！', player.name+' 中毒出局！', '#ff4444', true);
+        player.eliminated = true;
+        updatePlayerUI(player);
+        setTimeout(function(){
+          setLog('<span class="danger">'+player.name+'</span> 饮下了女巫的毒药，<span class="danger">出局了！</span>');
+          checkGameOver();
+          if(!G.gameOver) cb();
+        }, 2000);
+      }
+      break;
+
+    case 'antidote':
+      player.hasAntidote = true;
+      showEffectToast(card.icon, card.name, '获得解毒剂！下次免疫毒药', card.color, false);
+      updatePlayerUI(player);
+      setTimeout(cb, 1400);
+      break;
+
+    case 'extra_flip':
+      G.extraFlip = true;
+      showEffectToast(card.icon, card.name, '获得额外翻牌机会！', card.color, false);
+      setTimeout(cb, 1400);
+      break;
+
+    case 'peek':
+      // 放大镜：选择一张牌偷看
+      showEffectToast(card.icon, card.name, '选择一张未翻的牌偷看', card.color, false);
+      setTimeout(function(){
+        hideEffectToast();
+        if(player.isMe){
+          G.peekMode = true; G.peekCount = 1;
+          setLog('🔍 <span>点击一张未翻的牌偷看</span>（只有你能看到）');
+          addTargetSelectClass();
+          G.peekDoneCb = cb;
+        } else {
+          // AI随机偷看
+          var unflipped = G.cards.filter(function(c){ return !c.flipped && !c.used; });
+          if(unflipped.length>0) aiPeek(unflipped[Math.floor(Math.random()*unflipped.length)], player);
+          setTimeout(cb, 800);
+        }
+      }, 1400);
+      break;
+
+    case 'double_next':
+      G.doubleNext = true;
+      showEffectToast(card.icon, card.name, '下一张牌分数翻倍！', card.color, false);
+      setTimeout(cb, 1400);
+      break;
+
+    case 'steal':
+      // 棒棒糖：偷最高分玩家3分
+      var targets = G.players.filter(function(p){ return !p.eliminated && p.idx!==player.idx && p.score>0; });
+      targets.sort(function(a,b){ return b.score-a.score; });
+      if(targets.length>0){
+        var target = targets[0];
+        var stolen = Math.min(3, target.score);
+        target.score -= stolen; player.score += stolen;
+        showEffectToast(card.icon, card.name, '从 '+target.name+' 偷取 '+stolen+' 分！', card.color, false);
+        showScoreAnim('-'+stolen, false, target.idx);
+        showScoreAnim('+'+stolen, true);
+        updatePlayerUI(player); updatePlayerUI(target);
+      } else {
+        showEffectToast(card.icon, card.name, '没有可偷取的对手', card.color, false);
+      }
+      setTimeout(cb, 1600);
+      break;
+
+    case 'draw_tool':
+      // 魔法草药：随机获得1张道具牌
+      var avail = G.toolPile.filter(function(t){ return !t.used; });
+      if(avail.length>0){
+        var got = avail[Math.floor(Math.random()*avail.length)];
+        got.used = true;
+        player.tools.push(cloneObj(got));
+        showEffectToast(card.icon, card.name, '获得道具：'+got.icon+' '+got.name, card.color, false);
+        renderToolPile(); renderMyTools();
+      } else {
+        showEffectToast(card.icon, card.name, '道具堆已空', card.color, false);
+      }
+      setTimeout(cb, 1600);
+      break;
+
+    default:
+      setTimeout(cb, 600);
+  }
+}
+
+function doPeek(idx, player){
+  var card = G.cards[idx];
+  if(!card || card.flipped || card.used) return;
+  // 递减剩余偷看次数
+  G.peekCount--;
+  // 显示牌正面
+  card._peeked = true;
+  renderCardGrid();
+  // 重建DOM后重新高亮可选牌
+  if(G.peekMode && G.peekCount > 0){
+    addTargetSelectClass();
+  } else {
+    G.peekMode = false;
+    removeTargetSelectClass();
+  }
+  // 弹出醒目的提示框显示卡牌信息（即使图片加载失败也能看到文字）
+  showEffectToast(card.icon, card.name, card.desc, '#60ffaa', false);
+  setLog('🔍 你偷看到：<span>'+card.icon+' '+card.name+'</span> — '+card.desc +
+    (G.peekCount > 0 ? ' <span class="highlight">（还剩 '+G.peekCount+' 次偷看）</span>' : ''));
+  setTimeout(function(){
+    card._peeked = false;
+    renderCardGrid();
+    if(G.peekMode){ addTargetSelectClass(); }
+    // 全部偷看完毕才回调
+    if(!G.peekMode && G.peekDoneCb){ G.peekDoneCb(); G.peekDoneCb = null; }
+  }, 3000);
+}
+
+function aiPeek(card, player){
+  // AI记住偷看结果（简化：存储到AI info中，不影响显示）
+  setLog('<span>'+player.name+'</span> 偷看了一张牌...');
+}
+
+function addTargetSelectClass(){
+  G.cards.forEach(function(c){
+    if(!c.flipped && !c.used){
+      var el = document.getElementById('card-'+c.gridIdx);
+      if(el) el.classList.add('target-select');
+    }
+  });
+}
+function removeTargetSelectClass(){
+  document.querySelectorAll('.card-item').forEach(function(el){ el.classList.remove('target-select'); });
+}
+
+// ============================================================
+// 5积分兑换道具
+// ============================================================
+function redeemTool(){
+  if(G.gameOver) return;
+  var me = G.players.find(function(p){ return p.isMe; });
+  if(!me || me.eliminated){ setLog('⚠️ 你已出局，无法兑换'); return; }
+  if(G.currentPlayer !== me.idx){ setLog('⚠️ 不是你的回合！只能在自己回合兑换'); return; }
+  if(me.score < 5){ setLog('⚠️ <span class="danger">积分不足5分！</span>无法兑换道具'); return; }
+
+  var avail = G.toolPile.filter(function(t){ return !t.used; });
+  if(avail.length === 0){ setLog('⚠️ 道具堆已空，无法兑换'); return; }
+
+  // 扣除5分
+  me.score -= 5;
+  showScoreAnim('-5', false);
+
+  // 随机兑换1张
+  var got = avail[Math.floor(Math.random() * avail.length)];
+  got.used = true;
+  var toolCopy = cloneObj(got);
+  me.tools.push(toolCopy);
+
+  var isAntidote = got.id === 'antidote';
+  var toastColor = isAntidote ? '#80ffdd' : '#f8d97a';
+  showEffectToast('🪙', '兑换道具！',
+    '消耗5分 → 获得：' + got.icon + ' <b>' + got.name + '</b>' + (isAntidote ? '（可免疫毒药！）' : ''),
+    toastColor, false);
+
+  setLog('🪙 <span>' + me.name + '</span> 花费5分兑换了 ' + got.icon + ' <span>' + got.name + '</span>');
+  updatePlayerUI(me);
+  renderToolPile();
+  renderMyTools();
+  updateRedeemBtn();
+}
+
+// 更新兑换按钮状态（积分不足或非玩家回合时禁用提示）
+function updateRedeemBtn(){
+  var btn = document.getElementById('btn-redeem');
+  if(!btn) return;
+  var me = G.players.find(function(p){ return p.isMe; });
+  if(!me){ btn.disabled = true; return; }
+  var avail = G.toolPile.filter(function(t){ return !t.used; });
+  btn.disabled = me.eliminated || avail.length === 0;
+  btn.title = me.score < 5
+    ? '积分不足5分（当前' + me.score + '分）'
+    : '消耗5积分随机兑换1张道具牌（可能是解毒剂！）';
+  // 积分不足时视觉提示
+  btn.style.opacity = (me.score < 5 || G.currentPlayer !== me.idx) ? '0.5' : '1';
+}
+
+// ============================================================
+// 我的道具使用
+// ============================================================
+function useMyTool(toolIdx){
+  var me = G.players.find(function(p){ return p.isMe; });
+  if(!me || me.eliminated) return;
+  if(G.currentPlayer !== me.idx){ setLog('⚠️ 不是你的回合！'); return; }
+  var tool = me.tools[toolIdx];
+  if(!tool) return;
+  me.tools.splice(toolIdx, 1);
+
+  var btn = document.querySelectorAll('.my-tool-badge')[toolIdx];
+  if(btn){ btn.classList.add('activated'); }
+
+  applyToolEffect(tool, me, function(){
+    renderMyTools();
+    renderToolPile();
+  });
+}
+
+function applyToolEffect(tool, player, cb){
+  switch(tool.effect){
+    case 'antidote':
+      player.hasAntidote = true;
+      showEffectToast(tool.icon, tool.name, '解毒剂已激活！翻到毒药时免出局一次', '#80ffdd', false);
+      updatePlayerUI(player);
+      setTimeout(cb, 1400);
+      break;
+    case 'draw_2_pick_1':
+      // 强运甘露：摸道具堆顶2张，选1张加入手牌，另1张放回牌堆底
+      if(G.toolPile.filter(function(t){return !t.used;}).length < 2){
+        showEffectToast(tool.icon, tool.name, '道具堆不足2张，效果无法发动', '#f8d97a', false);
+        setTimeout(cb, 1400);
+        break;
+      }
+      showEffectToast(tool.icon, tool.name, '从道具堆摸取2张牌…', '#f8d97a', false);
+      setTimeout(function(){
+        // 取堆顶2张（从后往前取）
+        var available = [];
+        for(var i = G.toolPile.length-1; i >= 0 && available.length < 2; i--){
+          if(!G.toolPile[i].used){ available.push({ idx:i, tool:G.toolPile[i] }); }
+        }
+        if(available.length < 2){ cb(); return; }
+        if(player.isMe){
+          G.drawTwoChoice = available;
+          renderDrawTwoChoice(available, player, cb);
+        } else {
+          // AI随机选一张
+          var pick = available[Math.floor(Math.random()*available.length)];
+          G.toolPile[pick.idx].used = true;
+          player.tools.push(cloneObj(pick.tool));
+          renderToolPile(); renderMyTools();
+          setTimeout(cb, 600);
+        }
+      }, 1500);
+      break;
+    case 'steal_3':
+      // 妙手空空：获得一名其他玩家的3点积分
+      var targets3 = G.players.filter(function(p){ return !p.eliminated && p.idx!==player.idx && p.score>0; });
+      if(targets3.length===0){
+        showEffectToast(tool.icon, tool.name, '没有可偷取的对手', '#ff9090', false);
+        setTimeout(cb, 1400);
+        break;
+      }
+      if(!player.isMe){
+        // AI自动选积分最高的目标
+        targets3.sort(function(a,b){ return b.score-a.score; });
+        doStealFrom(player, targets3[0], 3, tool, cb);
+      } else if(targets3.length===1){
+        doStealFrom(player, targets3[0], 3, tool, cb);
+      } else {
+        showStealTargetPicker(player, targets3, 3, tool, cb);
+      }
+      break;
+    case 'peek_3':
+      // 窥视：查看3张食物牌
+      showEffectToast(tool.icon, tool.name, '可偷看3张食物牌', '#80c0ff', false);
+      setTimeout(function(){
+        if(player.isMe){
+          G.peekMode=true; G.peekCount=3;
+          setLog('👁 <span>窥视：点击3张牌偷看</span>');
+          addTargetSelectClass();
+          G.peekDoneCb = cb;
+        } else {
+          // AI自动偷看3张随机牌
+          var unpeek = G.cards.filter(function(c){ return !c.flipped && !c.used; });
+          for(var pi=0; pi<Math.min(3,unpeek.length); pi++){
+            unpeek[pi]._peeked = true;
+          }
+          setTimeout(cb, 600);
+        }
+      }, 1400);
+      break;
+    case 'swap_2':
+      // 移形换影：选择2张食物牌偷偷交换位置
+      var unf = G.cards.filter(function(c){ return !c.flipped && !c.used; });
+      if(unf.length < 2){
+        showEffectToast(tool.icon, tool.name, '未翻的牌不足2张，无法交换', '#c0a0ff', false);
+        setTimeout(cb, 1400);
+        break;
+      }
+      if(player.isMe){
+        showEffectToast(tool.icon, tool.name, '点击2张食物牌交换位置', '#c0a0ff', false);
+        G.swapMode = true; G.swapTargets = [];
+        setLog('👤 <span>移形换影：点击2张牌交换位置</span>');
+        addTargetSelectClass();
+        G.swapDoneCb = cb;
+      } else {
+        // AI随机交换2张牌
+        showEffectToast(tool.icon, tool.name, player.name+'悄悄交换了2张牌！', '#c0a0ff', false);
+        var si1 = Math.floor(Math.random()*unf.length);
+        var si2;
+        do { si2 = Math.floor(Math.random()*unf.length); } while(si2===si1);
+        var gi1=unf[si1].gridIdx, gi2=unf[si2].gridIdx;
+        var tmp = G.cards[gi1]; G.cards[gi1]=G.cards[gi2]; G.cards[gi2]=tmp;
+        G.cards[gi1].gridIdx=gi1; G.cards[gi2].gridIdx=gi2;
+        renderCardGrid();
+        setTimeout(cb, 1400);
+      }
+      break;
+    case 'force_flip':
+      // 力量药剂：选择一名其他玩家，你帮他翻1张食物牌，效果由他承担
+      var forceTargets = G.players.filter(function(p){ return !p.eliminated && p.idx!==player.idx; });
+      if(forceTargets.length===0){
+        showEffectToast(tool.icon, tool.name, '没有其他存活玩家', '#ffa060', false);
+        setTimeout(cb, 1400);
+        break;
+      }
+      if(!player.isMe){
+        // AI随机选一个目标
+        var forceVictim = forceTargets[Math.floor(Math.random()*forceTargets.length)];
+        showEffectToast(tool.icon, tool.name, player.name+' 对 '+forceVictim.name+' 使用了力量药剂！', '#ffa060', false);
+        setTimeout(function(){
+          var ufCards = G.cards.filter(function(c){ return !c.flipped && !c.used; });
+          if(ufCards.length===0){ cb(); return; }
+          var fc = ufCards[Math.floor(Math.random()*ufCards.length)];
+          flipCard(fc.gridIdx, forceVictim, function(){
+            applyCardEffect(fc, forceVictim, cb);
+          });
+        }, 1400);
+      } else {
+        showForceTargetPicker(forceTargets, player, tool, cb);
+      }
+      break;
+    case 'score_7':
+      // 点石成金：立即获得7点积分
+      player.score += 7;
+      showEffectToast(tool.icon, tool.name, '+7 点积分！', '#ffe060', false);
+      showScoreAnim('+7', true);
+      updatePlayerUI(player);
+      setTimeout(cb, 1400);
+      break;
+    case 'protect':
+      // 护身符：在你的下一个回合开始前，不会出局
+      player.shield = true;
+      showEffectToast(tool.icon, tool.name, '护身符生效！下个回合开始前不会出局', '#60ff90', false);
+      updatePlayerUI(player);
+      setTimeout(cb, 1400);
+      break;
+    default:
+      setTimeout(cb, 600);
+  }
+}
+
+// ============================================================
+// 移形换影 — 交换2张牌
+// ============================================================
+function doSwapSelect(idx){
+  var card = G.cards[idx];
+  if(!card || card.flipped || card.used) return;
+  if(G.swapTargets.indexOf(idx) >= 0) return; // 已选过
+  G.swapTargets.push(idx);
+  var el = document.getElementById('card-'+idx);
+  if(el) el.classList.add('swap-selected');
+  if(G.swapTargets.length === 2){
+    // 执行交换
+    var i1 = G.swapTargets[0], i2 = G.swapTargets[1];
+    var tmp = G.cards[i1];
+    G.cards[i1] = G.cards[i2];
+    G.cards[i2] = tmp;
+    // 更新 gridIdx
+    G.cards[i1].gridIdx = i1; G.cards[i2].gridIdx = i2;
+    G.swapMode = false; G.swapTargets = [];
+    setLog('👤 <span>已交换2张牌的位置！</span>');
+    renderCardGrid();
+    // 恢复可选高亮（如果有偷看模式）
+    if(G.peekMode) addTargetSelectClass();
+    if(G.swapDoneCb){ var cb2 = G.swapDoneCb; G.swapDoneCb = null; cb2(); }
+  } else {
+    setLog('👤 <span>已选1张，再选第2张交换位置</span>');
+  }
+}
+
+// ============================================================
+// 妙手空空 — 偷取积分
+// ============================================================
+function showStealTargetPicker(player, targets, amt, tool, cb){
+  var overlay = document.createElement('div');
+  overlay.className = 'steal-overlay';
+  overlay.innerHTML = '<div class="steal-panel"><h3>✋ 妙手空空 — 选择目标</h3><div class="steal-targets"></div></div>';
+  document.body.appendChild(overlay);
+  var container = overlay.querySelector('.steal-targets');
+  targets.forEach(function(t){
+    var btn = document.createElement('button');
+    btn.className = 'steal-btn';
+    btn.innerHTML = renderAvatarHTML(t, 'picker') + ' ' + t.name + ' ('+t.score+'分)';
+    btn.onclick = function(){
+      overlay.remove();
+      doStealFrom(player, t, amt, tool, cb);
+    };
+    container.appendChild(btn);
+  });
+}
+
+function doStealFrom(player, target, amt, tool, cb){
+  var actual = Math.min(amt, target.score);
+  target.score -= actual; player.score += actual;
+  showEffectToast(tool.icon, tool.name, '从 '+target.name+' 获得 '+actual+' 点积分！', '#ff9090', false);
+  showScoreAnim('+'+actual, true);
+  updatePlayerUI(player); updatePlayerUI(target);
+  setTimeout(cb, 1600);
+}
+
+// ============================================================
+// 强运甘露 — 摸2选1
+// ============================================================
+function renderDrawTwoChoice(available, player, cb){
+  var overlay = document.createElement('div');
+  overlay.className = 'steal-overlay'; // 复用 overlay 样式
+  overlay.innerHTML = '<div class="steal-panel"><h3>🍷 强运甘露 — 选择1张加入手牌</h3><div class="draw-two-cards"></div></div>';
+  document.body.appendChild(overlay);
+  var container = overlay.querySelector('.draw-two-cards');
+  available.forEach(function(item){
+    var div = document.createElement('div');
+    div.className = 'draw-card-item';
+    div.innerHTML = '<img src="'+item.tool.img+'" onerror="this.style.opacity=0"><div class="draw-name">'+item.tool.icon+' '+item.tool.name+'</div><div class="draw-desc">'+item.tool.desc+'</div>';
+    div.onclick = function(){
+      overlay.remove();
+      // 选中的加入手牌
+      var me = G.players.find(function(p){ return p.isMe; });
+      if(me) me.tools.push(item.tool);
+      G.toolPile[item.idx].used = true;
+      // 另一张放回牌堆底（保持未使用状态即可）
+      var other = available.find(function(a){ return a.idx !== item.idx; });
+      if(other) G.toolPile[other.idx].used = false; // 确保未标记（to bottom = 保持可用）
+      showEffectToast('🍷', '强运甘露', '选择了 '+item.tool.icon+' '+item.tool.name+' 加入手牌！', '#f8d97a', false);
+      renderToolPile();
+      renderMyTools();
+      setTimeout(cb, 1500);
+    };
+    container.appendChild(div);
+  });
+}
+
+// ============================================================
+// 力量药剂 — 选择其他玩家
+// ============================================================
+function showForceTargetPicker(targets, player, tool, cb){
+  var overlay = document.createElement('div');
+  overlay.className = 'steal-overlay';
+  overlay.innerHTML = '<div class="steal-panel"><h3>💪 力量药剂 — 选择一名玩家</h3><p style="color:#aaa;margin-bottom:12px;">你帮他翻一张食物牌，效果由他承担</p><div class="steal-targets"></div></div>';
+  document.body.appendChild(overlay);
+  var container = overlay.querySelector('.steal-targets');
+  targets.forEach(function(t){
+    var btn = document.createElement('button');
+    btn.className = 'steal-btn';
+    btn.innerHTML = renderAvatarHTML(t, 'picker') + ' ' + t.name;
+    btn.onclick = function(){
+      overlay.remove();
+      // 进入选牌模式：帮目标玩家翻牌
+      setLog('💪 <span>力量药剂：帮 '+t.name+' 翻一张食物牌</span>');
+      showEffectToast(tool.icon, tool.name, '帮 '+t.name+' 翻牌，效果由他承担', '#ffa060', false);
+      G.forceFlipTarget = t;
+      addTargetSelectClass();
+      G.forceFlipCb = cb;
+    };
+    container.appendChild(btn);
+  });
+}
+
+// 力量药剂：选牌回调
+function doForceFlip(idx){
+  var card = G.cards[idx];
+  if(!card || card.flipped || card.used) return;
+  var target = G.forceFlipTarget;
+  if(!target) return;
+  G.forceFlipTarget = null;
+  removeTargetSelectClass();
+  flipCard(idx, target, function(){
+    applyCardEffect(card, target, function(){
+      renderGame();
+      if(G.forceFlipCb){ var c3 = G.forceFlipCb; G.forceFlipCb = null; c3(); }
+    });
+  });
+}
+
+// ============================================================
+// 倒计时功能
+// ============================================================
+
+// 启动回合计时器（30秒）
+function startTurnTimer(){
+  // 先清除旧计时器
+  clearTurnTimer();
+
+  G.turnTimeLeft = 30;
+  G.timerRunning = true;
+
+  // 显示倒计时
+  var timerEl = document.getElementById('turn-timer');
+  if(timerEl){
+    timerEl.style.display = 'inline-block';
+    timerEl.textContent = '⏰ ' + G.turnTimeLeft + '秒';
+    timerEl.classList.remove('warning');
+  }
+
+  // 启动计时器（每秒更新）
+  G.turnTimer = setInterval(function(){
+    G.turnTimeLeft--;
+    var timerEl = document.getElementById('turn-timer');
+    if(timerEl){
+      timerEl.textContent = '⏰ ' + G.turnTimeLeft + '秒';
+      // 最后10秒警告
+      if(G.turnTimeLeft <= 10){
+        timerEl.classList.add('warning');
+      }
+    }
+
+    // 时间到
+    if(G.turnTimeLeft <= 0){
+      clearTurnTimer();
+      autoFlipCard(); // 自动翻牌
+    }
+  }, 1000);
+}
+
+// 清除回合计时器
+function clearTurnTimer(){
+  if(G.turnTimer){
+    clearInterval(G.turnTimer);
+    G.turnTimer = null;
+  }
+  G.timerRunning = false;
+
+  // 隐藏倒计时
+  var timerEl = document.getElementById('turn-timer');
+  if(timerEl){
+    timerEl.style.display = 'none';
+    timerEl.classList.remove('warning');
+  }
+}
+
+// 时间到，自动翻一张随机牌
+function autoFlipCard(){
+  if(G.gameOver) return;
+
+  var curP = G.players[G.currentPlayer];
+  if(!curP || !curP.isMe || curP.eliminated) return;
+
+  // 找一张未翻开的牌
+  var unflipped = [];
+  for(var i=0; i<G.cards.length; i++){
+    if(!G.cards[i].flipped && !G.cards[i].used){
+      unflipped.push(i);
+    }
+  }
+
+  if(unflipped.length === 0){
+    setLog('⏰ 时间到！但没有可翻的牌');
+    setTimeout(function(){ advanceTurn(); }, 500);
+    return;
+  }
+
+  // 随机选一张
+  var randomIdx = unflipped[Math.floor(Math.random() * unflipped.length)];
+  setLog('⏰ <span style="color:#ff6666">时间到！自动翻牌...</span>');
+
+  // 执行翻牌
+  flipCard(randomIdx, curP, function(){
+    applyCardEffect(G.cards[randomIdx], curP, function(){
+      if(!G.extraFlip){
+        setTimeout(function(){ advanceTurn(); }, 400);
+      } else {
+        G.extraFlip = false;
+        setLog('<span>'+curP.name+'</span> 获得额外翻牌机会！继续点击一张牌');
+      }
+    });
+  });
+}
+
+// ============================================================
+// 回合推进
+// ============================================================
+function advanceTurn(){
+  if(G.gameOver) return;
+  G.extraFlip = false;
+  // 检查所有牌翻完
+  var allFlipped = G.cards.every(function(c){ return c.flipped || c.used; });
+  if(allFlipped){ checkGameOver(); return; }
+
+  // 推进到下一个存活玩家
+  var next = G.currentPlayer;
+  var tries = 0;
+  do {
+    next = (next+1) % G.players.length;
+    tries++;
+  } while(G.players[next].eliminated && tries < G.players.length);
+
+  if(tries >= G.players.length){ checkGameOver(); return; }
+
+  G.currentPlayer = next;
+  G.turn++;
+  if(G.currentPlayer === 0) G.round++;
+
+  renderGame();
+
+  var curP = G.players[G.currentPlayer];
+  if(curP.eliminated){ advanceTurn(); return; }
+
+  // 更新回合指示器
+  var ind = document.getElementById('turn-indicator');
+  if(ind){
+    if(curP.isMe) ind.textContent = '⭐ 你的回合';
+    else ind.textContent = '⏳ ' + curP.name + ' 思考中...';
+  }
+
+  if(curP.isMe){
+    setLog('⭐ <span>轮到你了！</span>点击一张牌翻开（30秒内）');
+    startTurnTimer(); // 启动30秒计时器
+  } else {
+    clearTurnTimer(); // 清除计时器（AI回合不需要）
+    setLog('⏳ <span>'+curP.name+'</span> 思考中...');
+    // AI自动行动
+    var delay = 1200 + Math.floor(Math.random()*800);
+    setTimeout(function(){ doAITurn(curP); }, delay);
+  }
+}
+
+function doAITurn(aiPlayer){
+  try {
+    if(G.gameOver) { advanceTurn(); return; }
+    if(aiPlayer.eliminated) { advanceTurn(); return; }
+    var ind = document.getElementById('turn-indicator');
+    // AI偶尔使用道具
+    if(aiPlayer.tools.length > 0 && Math.random() > 0.6){
+      var t = aiPlayer.tools.shift();
+      if(ind) ind.textContent = '🤖 ' + aiPlayer.name + ' 使用道具：' + t.name;
+      applyToolEffect(t, aiPlayer, function(){
+        try {
+          renderPlayers(); renderMyTools();
+          setTimeout(function(){ aiDoFlip(aiPlayer); }, 500);
+        } catch(e) {
+          setLog('⚠️ AI道具使用后出错：' + e.message);
+          advanceTurn();
+        }
+      });
+      return;
+    }
+    if(ind) ind.textContent = '🤖 ' + aiPlayer.name + ' 正在翻牌...';
+    setTimeout(function(){ aiDoFlip(aiPlayer); }, 600);
+  } catch(e) {
+    setLog('⚠️ AI回合出错：' + e.message + '，跳过');
+    setTimeout(function(){ advanceTurn(); }, 1000);
+  }
+}
+
+// AI翻牌（独立函数，避免变量名冲突）
+function aiDoFlip(aiPlayer){
+  var ind = document.getElementById('turn-indicator');
+  var unflipped = G.cards.filter(function(c){ return !c.flipped && !c.used; });
+  if(unflipped.length === 0){
+    if(ind) ind.textContent = '⚠️ 没有可翻的牌';
+    advanceTurn();
+    return;
+  }
+
+  // 随机选一张未翻的牌
+  var card = unflipped[Math.floor(Math.random() * unflipped.length)];
+  var idx = card.gridIdx;
+
+  // 安全检查：索引是否有效
+  if(idx < 0 || idx >= G.cards.length || !G.cards[idx]){
+    setLog('⚠️ 卡牌索引异常（' + idx + '），跳过');
+    advanceTurn();
+    return;
+  }
+
+  if(ind) ind.textContent = '🤖 ' + aiPlayer.name + ' 翻牌中...';
+
+  // 翻牌
+  flipCard(idx, aiPlayer, function(){
+    var c = G.cards[idx];
+    if(!c){
+      setLog('⚠️ 卡牌数据丢失，强制结束回合');
+      advanceTurn();
+      return;
+    }
+    setLog('<span>' + aiPlayer.name + '</span> 翻开了 ' + c.icon + ' <span>' + c.name + '</span>');
+
+    // 安全超时：如果卡牌效果回调6秒内未触发，强制结束
+    var safetyTimer = setTimeout(function(){
+      setLog('⚠️ ' + aiPlayer.name + ' 的卡牌效果超时，强制结束回合');
+      advanceTurn();
+    }, 6000);
+
+    try {
+      applyCardEffect(c, aiPlayer, function(){
+        clearTimeout(safetyTimer);
+        if(!G.extraFlip){
+          setTimeout(function(){ advanceTurn(); }, 600);
+        } else {
+          // 能量饮料：额外翻一张
+          G.extraFlip = false;
+          var unflipped2 = G.cards.filter(function(cc){ return !cc.flipped && !cc.used; });
+          if(unflipped2.length > 0){
+            var c2 = unflipped2[Math.floor(Math.random() * unflipped2.length)];
+            setTimeout(function(){
+              flipCard(c2.gridIdx, aiPlayer, function(){
+                var safetyTimer2 = setTimeout(function(){
+                  setLog('⚠️ 额外翻牌效果超时');
+                  advanceTurn();
+                }, 6000);
+                applyCardEffect(c2, aiPlayer, function(){
+                  clearTimeout(safetyTimer2);
+                  setTimeout(function(){ advanceTurn(); }, 400);
+                });
+              });
+            }, 800);
+          } else { advanceTurn(); }
+        }
+      });
+    } catch(e) {
+      clearTimeout(safetyTimer);
+      setLog('⚠️ 卡牌效果出错：' + e.message);
+      advanceTurn();
+    }
+  });
+}
+
+// ============================================================
+// 游戏结束
+// ============================================================
+function checkGameOver(){
+  // 清除计时器
+  clearTurnTimer();
+
+  var alive = G.players.filter(function(p){ return !p.eliminated; });
+  var allFlipped = G.cards.every(function(c){ return c.flipped; });
+
+  if(alive.length <= 1 || allFlipped){
+    G.gameOver = true;
+    setTimeout(showResult, 1200);
+  }
+}
+
+function showResult(){
+  // 排序：存活优先，再按分数
+  var ranked = G.players.slice().sort(function(a,b){
+    if(a.eliminated && !b.eliminated) return 1;
+    if(!a.eliminated && b.eliminated) return -1;
+    return b.score - a.score;
+  });
+
+  var me = G.players.find(function(p){ return p.isMe; });
+  var meRank = ranked.indexOf(me)+1;
+  var isWin = me && !me.eliminated && meRank === 1;
+  var isSurvivedNotFirst = me && !me.eliminated && meRank > 1; // 存活但非第一
+
+  // 胜负结算
+  var walletChange = 0;
+  if(isWin){
+    walletChange = 350;
+    G.wallet += 350;
+  } else if(isSurvivedNotFirst){
+    // 存活未出局但非第一名：+40 积分（安慰奖）
+    walletChange = 40;
+    G.wallet += 40;
+  } else {
+    // 出局
+    walletChange = -350;
+    G.wallet = Math.max(0, G.wallet - 350);
+  }
+  updateWalletDisplay();
+
+  // 保存战绩到本地
+  if(me) updateStatsAfterGame(isWin, isSurvivedNotFirst, me.eliminated, me.score, walletChange, meRank);
+
+  var resultTitle = isWin ? '🏆 胜利！' : (me && me.eliminated ? '☠️ 你出局了' : '🎲 游戏结束');
+  var resultSub = isWin
+    ? '恭喜！你是最后的赢家！<br><span style="color:#60ff90">💰 +350 积分</span>（余额：'+G.wallet+'）'
+    : (isSurvivedNotFirst
+      ? '存活排名第 '+meRank+' 名<br><span style="color:#60ff90">💰 +40 积分</span>（余额：'+G.wallet+'）'
+      : '被女巫的毒药击倒...<br><span style="color:#ff6060">💰 -350 积分</span>（余额：'+G.wallet+'）');
+
+  document.getElementById('result-title').innerHTML = resultTitle;
+  document.getElementById('result-subtitle').innerHTML = resultSub;
+
+  var medals = ['🥇','🥈','🥉','4️⃣'];
+  var rankHtml = '';
+  ranked.forEach(function(p, i){
+    var avHtml = renderAvatarHTML(p, 'result');
+    rankHtml +=
+      '<div class="rank-row">'+
+        '<div class="rank-medal">'+medals[i]+'</div>'+
+        '<div style="font-size:22px">'+avHtml+'</div>'+
+        '<div class="rank-player-name">'+p.name+'</div>'+
+        (p.eliminated?'<div class="rank-eliminated">☠出局</div>':'')+
+        '<div class="rank-score">'+p.score+'分</div>'+
+      '</div>';
+  });
+  document.getElementById('result-rankings').innerHTML = rankHtml;
+  showPage('page-result');
+}
+
+function playAgain(){
+  if(G.wallet < G.entryFee){
+    showRecharge();
+    return;
+  }
+  G.wallet -= G.entryFee;
+  updateWalletDisplay();
+  matchedPlayers = [];
+  showMatch();
+}
+
+// ============================================================
+// UI 辅助函数
+// ============================================================
+function updatePlayerUI(player){
+  var el = document.getElementById('pcard-'+player.idx);
+  if(!el) return;
+  renderPlayers(); // 简单重渲
+}
+
+function showEffectToast(icon, name, desc, color, isDanger){
+  var toast = document.getElementById('effect-toast');
+  document.getElementById('effect-icon').textContent = icon;
+  document.getElementById('effect-name').textContent = name;
+  document.getElementById('effect-desc').innerHTML = desc;
+  toast.className = 'effect-toast' + (isDanger?' danger-effect':'');
+  if(color) toast.style.borderColor = color;
+  toast.classList.add('show');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(hideEffectToast, 1800);
+}
+
+function hideEffectToast(){
+  document.getElementById('effect-toast').classList.remove('show');
+}
+
+function showScoreAnim(text, isGain, playerIdx){
+  var anim = document.createElement('div');
+  anim.className = isGain ? 'score-gain-anim' : 'score-steal-anim';
+  anim.textContent = text;
+  // 定位到对应玩家卡片
+  var targetEl = playerIdx !== undefined ? document.getElementById('pcard-'+playerIdx) : null;
+  if(targetEl){
+    var rect = targetEl.getBoundingClientRect();
+    anim.style.left = (rect.left + rect.width/2 - 20)+'px';
+    anim.style.top = rect.top+'px';
+  } else {
+    anim.style.left = '50%';
+    anim.style.top = '40%';
+    anim.style.transform = 'translateX(-50%)';
+  }
+  document.body.appendChild(anim);
+  setTimeout(function(){ anim.remove(); }, 1200);
+}
+
+function addPoisonSplash(){
+  var splash = document.createElement('div');
+  splash.className = 'poison-splash';
+  document.body.appendChild(splash);
+  setTimeout(function(){ splash.remove(); }, 1500);
+}
+
+// 全局错误捕获
+window.onerror = function(msg, url, line, col, err){
+  console.error('[ERROR] ' + msg + ' at line ' + line);
+  return false;
+};
+<!-- 战绩系统 -->
+// 战绩数据（localStorage 持久化）
+var PLAYER_STATS = null;
+var STATS_KEY = 'witch_poison_stats';
+
+function loadPlayerStats(){
+  try {
+    var raw = localStorage.getItem(STATS_KEY);
+    if(raw){ PLAYER_STATS = JSON.parse(raw); return; }
+  } catch(e){}
+  PLAYER_STATS = {
+    totalGames: 0,
+    wins: 0,
+    survivals: 0,
+    eliminations: 0,
+    totalScoreEarned: 0,
+    highestScore: 0,
+    totalWalletChange: 0,
+    bestRank: 999,
+    firstPlayed: null,
+    lastPlayed: null
+  };
+}
+
+function savePlayerStats(){
+  try { localStorage.setItem(STATS_KEY, JSON.stringify(PLAYER_STATS)); } catch(e){}
+}
+
+function updateStatsAfterGame(isWin, isSurvived, isEliminated, gameScore, walletChange, rank){
+  if(!PLAYER_STATS) loadPlayerStats();
+  PLAYER_STATS.totalGames++;
+  if(isWin) PLAYER_STATS.wins++;
+  if(isSurvived && !isWin) PLAYER_STATS.survivals++;
+  if(isEliminated) PLAYER_STATS.eliminations++;
+  PLAYER_STATS.totalScoreEarned += gameScore;
+  if(gameScore > PLAYER_STATS.highestScore) PLAYER_STATS.highestScore = gameScore;
+  PLAYER_STATS.totalWalletChange += walletChange;
+  if(rank < PLAYER_STATS.bestRank) PLAYER_STATS.bestRank = rank;
+  if(!PLAYER_STATS.firstPlayed) PLAYER_STATS.firstPlayed = Date.now();
+  PLAYER_STATS.lastPlayed = Date.now();
+  savePlayerStats();
+}
+
+function showStats(){
+  if(!PLAYER_STATS) loadPlayerStats();
+  var s = PLAYER_STATS;
+  document.getElementById('stats-total').textContent = s.totalGames;
+  document.getElementById('stats-wins').textContent = s.wins;
+  document.getElementById('stats-survivals').textContent = s.survivals;
+  document.getElementById('stats-eliminations').textContent = s.eliminations;
+  var winRate = s.totalGames > 0 ? Math.round(s.wins / s.totalGames * 100) + '%' : '0%';
+  document.getElementById('stats-winrate').textContent = winRate;
+  document.getElementById('stats-total-score').textContent = s.totalScoreEarned;
+  document.getElementById('stats-highest-score').textContent = s.highestScore;
+  var wc = s.totalWalletChange;
+  var wcEl = document.getElementById('stats-wallet-change');
+  wcEl.textContent = (wc >= 0 ? '+' : '') + wc;
+  wcEl.className = 'stats-value' + (wc >= 0 ? ' win' : ' lose');
+  document.getElementById('stats-best-rank').textContent = s.bestRank <= 4 ? s.bestRank + 'st' : (s.bestRank <= 999 ? s.bestRank : '-');
+  document.getElementById('stats-first-played').textContent = s.firstPlayed ? new Date(s.firstPlayed).toLocaleDateString('zh-CN') : '-';
+  document.getElementById('stats-last-played').textContent = s.lastPlayed ? new Date(s.lastPlayed).toLocaleDateString('zh-CN') : '-';
+  document.getElementById('stats-modal').classList.add('show');
+}
+
+function closeStats(){
+  document.getElementById('stats-modal').classList.remove('show');
+}
+
+function resetStats(){
+  if(!confirm('确定要重置所有战绩吗？此操作不可恢复！')) return;
+  PLAYER_STATS = {
+    totalGames: 0, wins: 0, survivals: 0, eliminations: 0,
+    totalScoreEarned: 0, highestScore: 0, totalWalletChange: 0,
+    bestRank: 999, firstPlayed: null, lastPlayed: null
+  };
+  savePlayerStats();
+  showStats(); // 刷新显示
+}
+
+// ============================================================
+// 页面初始化：刷新后恢复上次积分/名字/头像
+// ============================================================
+(function pageInit(){
+  // 先读取名字，再按用户名加载积分（用户独立积分系统）
+  // updateWalletDisplay() 会在 loadWalletForUser() 内被调用
+  // 此处先用默认值更新一次UI，防止空白
+  updateWalletDisplay();
+
+  // 视频播放兜底（解决微信/移动端 autoplay 限制）
+  var video = document.getElementById('home-video-bg');
+  var fallback = document.getElementById('home-video-fallback');
+  if(video){
+    var p = video.play();
+    if(p !== undefined){
+      p.then(function(){
+        if(fallback) fallback.style.display = 'none';
+      }).catch(function(){
+        // autoplay 被阻止，500ms 后重试一次
+        setTimeout(function(){
+          video.play().then(function(){
+            if(fallback) fallback.style.display = 'none';
+          }).catch(function(){
+            // 彻底失败，显示静态背景
+            if(fallback) fallback.style.display = 'block';
+            video.style.display = 'none';
+          });
+        }, 500);
+      });
+    }
+    // 视频加载失败也显示静态背景
+    video.addEventListener('error', function(){
+      if(fallback) fallback.style.display = 'block';
+      video.style.display = 'none';
+    });
+  }
+  // 微信 X5 内核：WeixinJSBridgeReady 后再触发一次播放
+  if(typeof WeixinJSBridge !== 'undefined'){
+    document.addEventListener('WeixinJSBridgeReady', function(){
+      if(video) video.play();
+    }, false);
+  }
+
+  // 恢复自定义名字
+  var nameInput = document.getElementById('custom-name');
+  if(nameInput && CUSTOM_NAME) nameInput.value = CUSTOM_NAME;
+
+  // 恢复自定义头像
+  if(CUSTOM_AVATAR_FILE){
+    var selImg = document.querySelector('.avatar-select-img[data-file="'+CUSTOM_AVATAR_FILE+'"]');
+    if(selImg) selImg.classList.add('selected');
+  }
+
+  // 按当前用户名加载对应积分
+  loadWalletForUser();
+})();
+
+// ============================================================
+// 主页炫酷粒子系统（魔法光点 + 坩埚气泡）
+// ============================================================
+(function homeFX(){
+  var container = document.getElementById('magic-particles');
+  if(!container) return;
+
+  // 颜色调色板：金/紫/青/白
+  var palette = [
+    '#f8d97a','#e0b0ff','#00ffcc','#ff6ec7','#ffdd44','#aa88ff','#66ffaa','#ffaacc'
+  ];
+
+  // 创建魔法光点粒子
+  function spawnParticle(){
+    var dot = document.createElement('div');
+    dot.className = 'magic-particle';
+    var size = 2 + Math.random() * 5;
+    var color = palette[Math.floor(Math.random() * palette.length)];
+    var left = Math.random() * 100;
+    var top = Math.random() * 100;
+    var dx = (Math.random() - 0.5) * 200;
+    var dy = -(40 + Math.random() * 120); // 向上飘
+    var dx2 = dx + (Math.random() - 0.5) * 100;
+    var dy2 = dy - 50 - Math.random() * 100;
+    var dur = 4 + Math.random() * 8;
+    var delay = Math.random() * 3;
+    var alpha = 0.4 + Math.random() * 0.6;
+
+    dot.style.cssText = [
+      'width:'+size+'px','height:'+size+'px',
+      'left:'+left+'%','top:'+top+'%',
+      'background:'+color,
+      'box-shadow: 0 0 '+ (size*3) +'px '+ (size) +'px '+color,
+      '--dx:'+dx+'px','--dy:'+dy+'px',
+      '--dx2:'+dx2+'px','--dy2:'+dy2+'px',
+      '--dur:'+dur+'s','--delay: -'+delay+'s',
+      '--alpha:'+alpha
+    ].join(';');
+
+    container.appendChild(dot);
+    // 动画结束后移除
+    setTimeout(function(){ if(dot.parentNode) dot.parentNode.removeChild(dot); }, (dur + delay) * 1000 + 500);
+  }
+
+  // 持续生成粒子
+  setInterval(function(){
+    if(document.getElementById('page-home').classList.contains('active')){
+      spawnParticle();
+      // 偶尔多生成一两个
+      if(Math.random() < 0.3) spawnParticle();
+    }
+  }, 400);
+
+  // 初始预生成一批
+  for(var i=0; i<15; i++){ spawnParticle(); }
+
+  // ---- 坩埚气泡系统 ----
+  (function cauldronBubbles(){
+    var cauldron = document.querySelector('.home-cauldron');
+    if(!cauldron) return;
+
+    function spawnBubble(){
+      var bub = document.createElement('div');
+      bub.className = 'cauldron-bubble';
+      var size = 6 + Math.random() * 14;
+      var dur = 1.5 + Math.random() * 2;
+      var delay = Math.random() * 2;
+      bub.style.cssText = [
+        'width:'+size+'px','height:'+size+'px',
+        'bottom:85px',
+        'left:'+(47 + Math.random()*6)+'%',
+        '--bubdur:'+dur+'s',
+        '--bubdelay:-'+delay+'s'
+      ].join(';');
+      document.getElementById('page-home').appendChild(bub);
+      setTimeout(function(){ if(bub.parentNode) bub.parentNode.removeChild(bub); }, (dur + delay) * 1000 + 500);
+    }
+
+    setInterval(function(){
+      if(document.getElementById('page-home').classList.contains('active')){
+        spawnBubble();
+        if(Math.random() < 0.4) spawnBubble();
+      }
+    }, 600);
+
+    for(var j=0; j<6; j++){ spawnBubble(); }
+  })();
+})();
+</script>
+<!-- 兑换码数据（由 payment_monitor.py 自动生成，请勿手动修改） -->
+<script src="confirmed_codes.js"></script>
+</body>
+</html>
