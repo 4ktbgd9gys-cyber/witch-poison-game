@@ -1427,7 +1427,7 @@
   </div>
   <div class="match-progress"><div class="match-progress-bar" id="match-bar"></div></div>
   <div class="match-status" id="match-status">正在搜索对手<span class="match-waiting-dots"></span></div>
-  <button class="btn-witch" id="btn-skip-match" onclick="startGameNow()" style="display:none">⚡ 立即开始</button>
+  <!-- 立即开始按钮已移除，匹配成功后自动开始 -->
 </div>
 
 <!-- ======================================================
@@ -2101,7 +2101,6 @@ function showMatch(){
       filledCount++;
       if(filledCount===4){
         document.getElementById('match-status').textContent = '匹配成功！即将开始...';
-        document.getElementById('btn-skip-match').style.display = 'inline-block';
         matchTimer = setTimeout(startGameNow, 2000);
       }
     }, delay);
