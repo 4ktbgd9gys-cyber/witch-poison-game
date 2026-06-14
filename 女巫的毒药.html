@@ -1427,7 +1427,7 @@
   </div>
   <div class="match-progress"><div class="match-progress-bar" id="match-bar"></div></div>
   <div class="match-status" id="match-status">正在搜索对手<span class="match-waiting-dots"></span></div>
-  <!-- 立即开始按钮已移除，匹配成功后自动开始 -->
+  <button class="btn-witch" id="btn-skip-match" onclick="skipMatch();clearInterval(G._matchBarTimer);clearTimeout(G._matchTimer);" style="display:none;margin-top:24px">⚡ 立即开始</button>
 </div>
 
 <!-- ======================================================
@@ -2090,7 +2090,9 @@ function showMatch(){
   setTimeout(function(){ fillMatchSlot(0, CUSTOM_NAME, '🧙‍♀️', false, true); }, 300);
   var bar = document.getElementById('match-bar');
   var prog = 0;
-  var barT = setInterval(function(){ prog=Math.min(prog+2,100); bar.style.width=prog+'%'; if(prog>=100)clearInterval(barT); }, 60);
+  G._matchBarTimer = setInterval(function(){ prog=Math.min(prog+2,100); bar.style.width=prog+'%'; if(prog>=100)clearInterval(G._matchBarTimer); }, 60);
+  var btnSkip = document.getElementById('btn-skip-match');
+  if(btnSkip) btnSkip.style.display = 'none';
   var filledCount = 1;
   var delays = [1200, 2100, 3000];
   delays.forEach(function(delay, idx){
@@ -2101,7 +2103,8 @@ function showMatch(){
       filledCount++;
       if(filledCount===4){
         document.getElementById('match-status').textContent = '匹配成功！即将开始...';
-        matchTimer = setTimeout(startGameNow, 2000);
+        if(btnSkip) btnSkip.style.display = 'inline-block';
+        G._matchTimer = setTimeout(startGameNow, 2000);
       }
     }, delay);
   });
@@ -2123,8 +2126,26 @@ function fillMatchSlot(idx, name, avatar, isAI, isMe){
   matchedPlayers.push({ name:name, avatar:avatar, isAI:isAI, isMe:isMe });
 }
 
+function skipMatch(){
+  if(G._matchBarTimer) clearInterval(G._matchBarTimer);
+  if(G._matchTimer) clearTimeout(G._matchTimer);
+  document.getElementById('match-bar').style.width = '100%';
+  document.getElementById('match-status').textContent = '匹配成功！';
+  // 填满所有空位
+  for(var i=1;i<4;i++){
+    var slot = document.getElementById('mslot-'+i);
+    if(slot && !slot.classList.contains('filled')){
+      var isAI = Math.random()>0.4;
+      var aname = isAI ? ('AI_'+AI_AVATARS[(i)%AI_AVATARS.length]) : PLAYER_NAMES[(i)%PLAYER_NAMES.length];
+      fillMatchSlot(i, aname, AI_AVATARS[(i)%AI_AVATARS.length], isAI, false);
+    }
+  }
+  setTimeout(startGameNow, 800);
+}
+
 function startGameNow(){
-  if(matchTimer) clearTimeout(matchTimer);
+  if(G._matchTimer) clearTimeout(G._matchTimer);
+  if(G._matchBarTimer) clearInterval(G._matchBarTimer);
   // 确保读取最新的自定义名字
   var nameInput = document.getElementById('custom-name');
   if(nameInput) CUSTOM_NAME = nameInput.value.trim() || ('玩家_'+Math.floor(Math.random()*9000+1000));
