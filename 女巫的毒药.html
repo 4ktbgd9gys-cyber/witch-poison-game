@@ -906,6 +906,10 @@
     box-shadow: 0 0 15px rgba(248,217,122,0.5);
     transform: scale(1.05);
   }
+  @keyframes glowGreen {
+    from { box-shadow: 0 0 10px rgba(78,201,78,0.3); }
+    to { box-shadow: 0 0 25px rgba(78,201,78,0.7), 0 0 50px rgba(78,201,78,0.3); }
+  }
 
   /* 充值弹窗 */
   .recharge-modal {
@@ -1438,6 +1442,7 @@
     <div class="game-title-small">🧙 女巫的毒药</div>
     <div class="game-round-info" id="round-info">第 1 轮 · 回合 1</div>
     <div style="color:#f8d97a;font-size:14px;">💰 <span id="game-wallet-display">10000</span></div>
+    <button class="game-btn-sm" onclick="showRecharge()" style="background:linear-gradient(135deg,#c8a020,#e8c840);color:#1a0e08;font-weight:bold;" title="充值积分">💎充值</button>
     <button class="game-btn-sm" onclick="showRulesFromGame()">📜规则</button>
     <span id="turn-indicator" style="font-size:12px;color:#f8d97a;margin-left:10px;"></span>
     <span id="turn-timer" style="font-size:13px;color:#ff6666;margin-left:8px;font-weight:bold;display:none;">⏰ 30秒</span>
@@ -1554,8 +1559,8 @@
 <!-- 充值弹窗 -->
 <div class="recharge-modal" id="recharge-modal">
   <div class="recharge-box">
-    <h3>💰 积分不足</h3>
-    <p>当前余额：<b style="color:#f8d97a;" id="recharge-current">0</b> 积分<br>需要至少 <b style="color:#ff6060">20</b> 积分才能开始游戏</p>
+    <h3 id="recharge-title">💰 充值积分</h3>
+    <p id="recharge-hint-text">当前余额：<b style="color:#f8d97a;" id="recharge-current">0</b> 积分<br>选择套餐扫码充值，付款后点击确认即可到账</p>
     <div class="recharge-options">
       <div class="recharge-opt" onclick="doRecharge(500,'¥6')">
         <span>🪙 500 积分</span>
@@ -1590,9 +1595,10 @@
     <!-- 支付iframe区域 -->
     <div style="margin:12px auto;border-radius:12px;overflow:hidden;box-shadow:0 0 20px rgba(200,160,32,0.3);background:#fff;min-height:300px;text-align:center;padding:20px;" id="pay-iframe-container">
       <!-- 手动扫码支付：直接显示二维码图片 -->
-      <img src="pay_qrcode.png" alt="扫码支付" style="max-width:260px;width:100%;display:block;margin:0 auto 12px;" onerror="this.style.display='none';document.getElementById('pay-fallback-text').style.display='block';">
+      <img src="pay_qrcode.png" alt="扫码支付" style="max-width:260px;width:100%;display:block;margin:0 auto 8px;" onerror="this.style.display='none';document.getElementById('pay-fallback-text').style.display='block';">
       <p id="pay-fallback-text" style="display:none;color:#aaa;padding:20px;font-size:14px;">二维码加载失败，请联系客服</p>
-      <p style="color:#c8a020;font-size:13px;margin:0;">扫码支付后，联系客服发放积分</p>
+      <p style="color:#333;font-size:14px;margin:8px 0 4px;" id="pay-step-hint">📱 第一步：扫描上方二维码付款</p>
+      <p style="color:#60ff90;font-size:15px;font-weight:bold;margin:0;" id="pay-points-hint"></p>
       <!-- 自动支付（Cloudflare Worker 部署后取消注释）
       <div id="pay-loading" style="padding:60px 20px;text-align:center;">
         <div style="color:#888;font-size:13px;margin-bottom:12px;">⏳ 正在连接支付服务...</div>
@@ -1601,8 +1607,13 @@
       <iframe id="pay-iframe" style="display:none;width:100%;height:380px;border:none;"></iframe>
       -->
     </div>
-    <p style="color:#4ec94e;font-size:13px;margin-top:8px;" id="pay-auto-msg">🤖 <b>全自动到账</b>：付款后无需任何操作，积分自动到账！</p>
-    <button class="recharge-close" onclick="closePayModal()" style="margin-top:6px;">✕ 关闭</button>
+    <p style="color:#4ec94e;font-size:13px;margin-top:8px;" id="pay-auto-msg">💡 付款完成后，点击下方按钮即可到账</p>
+    <button onclick="confirmPayment()" id="btn-confirm-pay" class="btn-witch" style="margin-top:12px;padding:14px 36px;font-size:16px;background:linear-gradient(135deg,#4ec94e,#2ea040);border-color:#4ec94e;animation:glowGreen 1.5s ease-in-out infinite alternate;">✅ 我已付款，立即到账</button>
+    <div id="pay-success-msg" style="display:none;margin-top:16px;padding:14px;border-radius:10px;background:rgba(78,201,78,0.15);border:1px solid #4ec94e;">
+      <p style="color:#4ec94e;font-size:18px;font-weight:bold;margin:0 0 6px;">🎉 充值成功！</p>
+      <p style="color:#f8d97a;font-size:15px;margin:0;" id="pay-success-detail"></p>
+    </div>
+    <button class="recharge-close" onclick="closePayModal()" style="margin-top:8px;" id="btn-close-pay">✕ 关闭</button>
   </div>
 </div>
 
@@ -1870,7 +1881,7 @@ function loadWalletForUser(){
 
 function startGameFlow(){
   if(G.wallet < G.entryFee){
-    showRecharge();
+    showRecharge(true);
     return;
   }
   // 扣入场费
@@ -1890,7 +1901,19 @@ function showWalletAnim(amount){
   setTimeout(function(){ if(span.parentNode) span.remove(); }, 1200);
 }
 
-function showRecharge(){
+function showRecharge(isInsufficient){
+  if(typeof isInsufficient === 'undefined') isInsufficient = false;
+  var title = document.getElementById('recharge-title');
+  var hint = document.getElementById('recharge-hint-text');
+  
+  if(isInsufficient){
+    title.textContent = '💰 积分不足';
+    hint.innerHTML = '当前余额：<b style="color:#f8d97a;">' + G.wallet + '</b> 积分<br>需要至少 <b style="color:#ff6060">20</b> 积分才能开始游戏';
+  } else {
+    title.textContent = '💰 充值积分';
+    hint.innerHTML = '当前余额：<b style="color:#f8d97a;">' + G.wallet + '</b> 积分<br>选择套餐扫码充值，付款后点击确认即可到账';
+  }
+  
   document.getElementById('recharge-current').textContent = G.wallet;
   document.getElementById('recharge-modal').classList.add('show');
 }
@@ -1913,16 +1936,50 @@ function doRecharge(amount, price){
   var me = G.players ? G.players.find(function(p){ return p.isMe; }) : null;
   var playerName = me ? me.name : (typeof CUSTOM_NAME !== 'undefined' ? CUSTOM_NAME : '玩家');
   
+  _payPendingPoints = amount;
   showPayModal(amount, price, playerName);
+}
+
+function confirmPayment(){
+  if(_payPendingPoints <= 0) return;
+  
+  var pts = _payPendingPoints;
+  G.wallet += pts;
+  saveWalletForUser();
+  updateWalletDisplay();
+  
+  // 显示成功信息
+  document.getElementById('btn-confirm-pay').style.display = 'none';
+  document.getElementById('pay-auto-msg').style.display = 'none';
+  var successDiv = document.getElementById('pay-success-msg');
+  successDiv.style.display = 'block';
+  document.getElementById('pay-success-detail').textContent = '+' + pts + ' 积分已到账，当前余额：' + G.wallet;
+  
+  // 更新充值弹窗里的余额显示（如果还在）
+  var rc = document.getElementById('recharge-current');
+  if(rc) rc.textContent = G.wallet;
+  
+  // 记录充值日志
+  setLog('💰 <span style="color:#4ec94e">充值到账：+' + pts + ' 积分（余额 ' + G.wallet + '）</span>');
+  
+  // 清空待发放积分
+  _payPendingPoints = 0;
 }
 
 function showPayModal(amount, price, playerName){
   var modal = document.getElementById('pay-modal');
   if(!modal) return;
   
+  // 重置UI状态
+  document.getElementById('btn-confirm-pay').style.display = 'inline-block';
+  document.getElementById('btn-close-pay').style.display = 'inline-block';
+  document.getElementById('pay-success-msg').style.display = 'none';
+  document.getElementById('pay-auto-msg').style.display = 'block';
+  
   document.getElementById('pay-title').textContent = '💳 充值 ' + amount + ' 积分';
   document.getElementById('pay-info').textContent = '实付 ¥' + price;
-  document.getElementById('pay-auto-msg').style.display = 'block';
+  document.getElementById('pay-step-hint').textContent = '📱 第一步：扫描上方二维码付款 ¥' + price;
+  document.getElementById('pay-points-hint').textContent = '🪙 付款后将获得 +' + amount + ' 积分';
   
   // 重置iframe
   var loading = document.getElementById('pay-loading');
@@ -3346,7 +3403,7 @@ function showResult(){
 
 function playAgain(){
   if(G.wallet < G.entryFee){
-    showRecharge();
+    showRecharge(true);
     return;
   }
   G.wallet -= G.entryFee;
