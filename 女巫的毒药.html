@@ -2554,13 +2554,13 @@ function applyCardEffect(card, player, cb){
       showEffectToast(card.icon, card.name, '选择一张未翻的牌偷看', card.color, false);
       setTimeout(function(){
         hideEffectToast();
-        if(player.isMe){
+        if(player.isMe && !player.isAI){
           G.peekMode = true; G.peekCount = 1;
           setLog('🔍 <span>点击一张未翻的牌偷看</span>（只有你能看到）');
           addTargetSelectClass();
           G.peekDoneCb = cb;
         } else {
-          // AI随机偷看
+          // AI随机偷看，自动完成
           var unflipped = G.cards.filter(function(c){ return !c.flipped && !c.used; });
           if(unflipped.length>0) aiPeek(unflipped[Math.floor(Math.random()*unflipped.length)], player);
           setTimeout(cb, 800);
@@ -2786,7 +2786,7 @@ function applyToolEffect(tool, player, cb){
       // 窥视：查看3张食物牌
       showEffectToast(tool.icon, tool.name, '可偷看3张食物牌', '#80c0ff', false);
       setTimeout(function(){
-        if(player.isMe){
+        if(player.isMe && !player.isAI){
           G.peekMode=true; G.peekCount=3;
           setLog('👁 <span>窥视：点击3张牌偷看</span>');
           addTargetSelectClass();
@@ -3148,8 +3148,8 @@ function advanceTurn(){
 
 function doAITurn(aiPlayer){
   try {
-    if(G.gameOver) { advanceTurn(); return; }
-    if(aiPlayer.eliminated) { advanceTurn(); return; }
+    if(G.gameOver) { return; }
+    if(aiPlayer.eliminated) { setTimeout(function(){ advanceTurn(); }, 300); return; }
     var ind = document.getElementById('turn-indicator');
     // AI偶尔使用道具
     if(aiPlayer.tools.length > 0 && Math.random() > 0.6){
@@ -3207,11 +3207,12 @@ function aiDoFlip(aiPlayer){
     }
     setLog('<span>' + aiPlayer.name + '</span> 翻开了 ' + c.icon + ' <span>' + c.name + '</span>');
 
-    // 安全超时：如果卡牌效果回调6秒内未触发，强制结束
+    // 安全超时：如果卡牌效果回调3秒内未触发，强制结束
     var safetyTimer = setTimeout(function(){
       setLog('⚠️ ' + aiPlayer.name + ' 的卡牌效果超时，强制结束回合');
+      G.peekMode = false; G.swapMode = false; G.forceFlipTarget = null;
       advanceTurn();
-    }, 6000);
+    }, 3000);
 
     try {
       applyCardEffect(c, aiPlayer, function(){
