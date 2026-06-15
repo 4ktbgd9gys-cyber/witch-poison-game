@@ -1587,28 +1587,24 @@
   </div>
 </div>
 
-<!-- 自动支付弹窗（全自动，无需人工审核） -->
+<!-- 自动支付弹窗（支付宝当面付，Worker动态二维码） -->
 <div class="recharge-modal" id="pay-modal">
   <div class="recharge-box" style="max-width:390px;">
     <h3 id="pay-title">💳 扫码支付</h3>
     <p style="color:#f8d97a;font-size:15px;" id="pay-info">正在生成支付二维码...</p>
-    <!-- 支付iframe区域 -->
-    <div style="margin:12px auto;border-radius:12px;overflow:hidden;box-shadow:0 0 20px rgba(200,160,32,0.3);background:#fff;min-height:300px;text-align:center;padding:20px;" id="pay-iframe-container">
-      <!-- 手动扫码支付：直接显示二维码图片 -->
-      <img src="pay_qrcode.png" alt="扫码支付" style="max-width:260px;width:100%;display:block;margin:0 auto 8px;" onerror="this.style.display='none';document.getElementById('pay-fallback-text').style.display='block';">
-      <p id="pay-fallback-text" style="display:none;color:#aaa;padding:20px;font-size:14px;">二维码加载失败，请联系客服</p>
-      <p style="color:#333;font-size:14px;margin:8px 0 4px;" id="pay-step-hint">📱 第一步：扫描上方二维码付款</p>
-      <p style="color:#60ff90;font-size:15px;font-weight:bold;margin:0;" id="pay-points-hint"></p>
-      <!-- 自动支付（Cloudflare Worker 部署后取消注释）
-      <div id="pay-loading" style="padding:60px 20px;text-align:center;">
-        <div style="color:#888;font-size:13px;margin-bottom:12px;">⏳ 正在连接支付服务...</div>
-        <div style="width:40px;height:40px;border:3px solid #c8a020;border-top-color:transparent;border-radius:50%;margin:0 auto;animation:spin 1s linear infinite;"></div>
+    <div style="margin:12px auto;border-radius:12px;overflow:hidden;box-shadow:0 0 20px rgba(200,160,32,0.3);background:#fff;min-height:280px;text-align:center;padding:20px;" id="pay-iframe-container">
+      <!-- 动态支付宝当面付二维码 -->
+      <div id="pay-qrcode-area" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:240px;">
+        <div id="pay-loading-spin" style="width:40px;height:40px;border:3px solid #c8a020;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:12px;"></div>
+        <p style="color:#888;font-size:13px;">⏳ 连接支付宝...</p>
       </div>
-      <iframe id="pay-iframe" style="display:none;width:100%;height:380px;border:none;"></iframe>
-      -->
+      <p id="pay-fallback-text" style="display:none;color:#f44;padding:20px;font-size:14px;">❌ 二维码生成失败，请稍后重试</p>
+      <p style="color:#333;font-size:14px;margin:8px 0 4px;" id="pay-step-hint">📱 扫描上方二维码付款</p>
+      <p style="color:#60ff90;font-size:15px;font-weight:bold;margin:0;" id="pay-points-hint"></p>
+      <p style="color:#aaa;font-size:11px;margin:6px 0 0;" id="pay-timer-hint"></p>
     </div>
-    <p style="color:#4ec94e;font-size:13px;margin-top:8px;" id="pay-auto-msg">💡 付款完成后，点击下方按钮即可到账</p>
-    <button onclick="confirmPayment()" id="btn-confirm-pay" class="btn-witch" style="margin-top:12px;padding:14px 36px;font-size:16px;background:linear-gradient(135deg,#4ec94e,#2ea040);border-color:#4ec94e;animation:glowGreen 1.5s ease-in-out infinite alternate;">✅ 我已付款，立即到账</button>
+    <p style="color:#4ec94e;font-size:13px;margin-top:8px;" id="pay-auto-msg">💡 付款完成后自动到账，无需手动确认</p>
+    <button onclick="_payPolStatus()" id="btn-confirm-pay" class="btn-witch" style="margin-top:12px;padding:14px 36px;font-size:16px;background:linear-gradient(135deg,#c8a020,#a08020);border-color:#c8a020;display:none;">🔄 检测付款状态</button>
     <div id="pay-success-msg" style="display:none;margin-top:16px;padding:14px;border-radius:10px;background:rgba(78,201,78,0.15);border:1px solid #4ec94e;">
       <p style="color:#4ec94e;font-size:18px;font-weight:bold;margin:0 0 6px;">🎉 充值成功！</p>
       <p style="color:#f8d97a;font-size:15px;margin:0;" id="pay-success-detail"></p>
@@ -1923,24 +1919,29 @@ function closeRecharge(){
 }
 
 // ============================================================
-// 自动支付系统（Cloudflare Workers + 码支付）
+// 自动支付系统（支付宝当面付 + 腾讯云SCF）
 // ============================================================
-// ⚠️ 部署Worker后将下方URL替换为实际Worker地址
-var WORKER_URL = 'https://witch-poison.YOUR_SUBDOMAIN.workers.dev';
+// 腾讯云SCF云函数地址（支付宝当面付支付网关）
+var PAY_API_BASE = 'https://1423167433-2tp4x8zn4r.ap-guangzhou.tencentscf.com';
+var WORKER_URL = PAY_API_BASE; // 向后兼容
 
-var _payPendingPoints = 0; // 待发放的积分
+var _payPendingPoints = 0;
+var _payOutTradeNo = '';
+var _payPollTimer = null;
+var _payExpireTimer = null;
 
 function doRecharge(amount, price){
   closeRecharge();
-  // 获取玩家昵称
   var me = G.players ? G.players.find(function(p){ return p.isMe; }) : null;
   var playerName = me ? me.name : (typeof CUSTOM_NAME !== 'undefined' ? CUSTOM_NAME : '玩家');
   
   _payPendingPoints = amount;
+  _payOutTradeNo = '';
   showPayModal(amount, price, playerName);
 }
 
-function confirmPayment(){
+// 支付到账：加积分 + 更新UI
+function _payDeliver(points){
   if(_payPendingPoints <= 0) return;
   
   var pts = _payPendingPoints;
@@ -1948,97 +1949,210 @@ function confirmPayment(){
   saveWalletForUser();
   updateWalletDisplay();
   
-  // 显示成功信息
   document.getElementById('btn-confirm-pay').style.display = 'none';
-  document.getElementById('pay-auto-msg').style.display = 'none';
-  var successDiv = document.getElementById('pay-success-msg');
-  successDiv.style.display = 'block';
-  document.getElementById('pay-success-detail').textContent = '+' + pts + ' 积分已到账，当前余额：' + G.wallet;
+  document.getElementById('pay-auto-msg').textContent = '✅ 积分已自动到账！';
+  document.getElementById('pay-auto-msg').style.color = '#4ec94e';
+  document.getElementById('pay-title').textContent = '✅ 充值成功';
+  document.getElementById('pay-info').textContent = '';
   
-  // 更新充值弹窗里的余额显示（如果还在）
+  var sd = document.getElementById('pay-success-msg');
+  sd.style.display = 'block';
+  document.getElementById('pay-success-detail').textContent = '+' + pts + ' 积分已到账，余额：' + G.wallet;
+  
   var rc = document.getElementById('recharge-current');
   if(rc) rc.textContent = G.wallet;
   
-  // 记录充值日志
-  setLog('💰 <span style="color:#4ec94e">充值到账：+' + pts + ' 积分（余额 ' + G.wallet + '）</span>');
+  if(typeof setLog === 'function') {
+    setLog('💰 <span style="color:#4ec94e">充值到账：+' + pts + ' 积分（余额 ' + G.wallet + '）</span>');
+  }
   
-  // 清空待发放积分
   _payPendingPoints = 0;
+  _payStopPoll();
+}
+
+// 轮询支付状态（每2秒查一次Worker）
+function _payStartPoll(){
+  if(!_payOutTradeNo) return;
+  
+  document.getElementById('btn-confirm-pay').style.display = 'none';
+  
+  var count = 0;
+  _payPollTimer = setInterval(function(){
+    count++;
+    if(count > 150){ _payStopPoll(); return; } // 5分钟超时
+    
+    fetch(WORKER_URL + '/api/check?outTradeNo=' + _payOutTradeNo)
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if(data && data.paid){
+          _payDeliver(data.points || _payPendingPoints);
+        }
+      })
+      .catch(function(){});
+  }, 2000);
+}
+
+function _payPolStatus(){
+  // 手动检测按钮
+  if(!_payOutTradeNo) return;
+  var btn = document.getElementById('btn-confirm-pay');
+  btn.textContent = '⏳ 检测中...';
+  btn.disabled = true;
+  
+  fetch(WORKER_URL + '/api/check?outTradeNo=' + _payOutTradeNo)
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if(data && data.paid){
+        _payDeliver(data.points || _payPendingPoints);
+      } else {
+        btn.textContent = '🔄 再次检测';
+        btn.disabled = false;
+        btn.style.display = 'inline-block';
+        var hint = document.getElementById('pay-timer-hint');
+        if(hint) hint.textContent = '⏳ 暂未收到付款，确认已付款可再次检测';
+      }
+    })
+    .catch(function(){
+      btn.textContent = '🔄 重新检测';
+      btn.disabled = false;
+      btn.style.display = 'inline-block';
+    });
+}
+
+function _payStopPoll(){
+  if(_payPollTimer) clearInterval(_payPollTimer);
+  if(_payExpireTimer) clearTimeout(_payExpireTimer);
+  _payPollTimer = null;
+  _payExpireTimer = null;
 }
 
 function showPayModal(amount, price, playerName){
   var modal = document.getElementById('pay-modal');
   if(!modal) return;
   
-  // 重置UI状态
-  document.getElementById('btn-confirm-pay').style.display = 'inline-block';
-  document.getElementById('btn-close-pay').style.display = 'inline-block';
+  // 停止旧轮询
+  _payStopPoll();
+  
+  // 重置UI
   document.getElementById('pay-success-msg').style.display = 'none';
+  document.getElementById('btn-confirm-pay').style.display = 'none';
+  document.getElementById('pay-fallback-text').style.display = 'none';
   document.getElementById('pay-auto-msg').style.display = 'block';
+  document.getElementById('pay-auto-msg').textContent = '💡 正在生成支付宝二维码...';
+  document.getElementById('pay-auto-msg').style.color = '#4ec94e';
+  document.getElementById('pay-timer-hint').textContent = '';
   
   document.getElementById('pay-title').textContent = '💳 充值 ' + amount + ' 积分';
   document.getElementById('pay-info').textContent = '实付 ¥' + price;
-  document.getElementById('pay-step-hint').textContent = '📱 第一步：扫描上方二维码付款 ¥' + price;
+  document.getElementById('pay-step-hint').textContent = '📱 用支付宝扫描二维码付款 ¥' + price;
   document.getElementById('pay-points-hint').textContent = '🪙 付款后将获得 +' + amount + ' 积分';
   
-  // 重置iframe
-  var loading = document.getElementById('pay-loading');
-  var iframe = document.getElementById('pay-iframe');
-  if(loading) loading.style.display = 'block';
-  if(iframe) iframe.style.display = 'none';
+  // 显示加载动画
+  var qrArea = document.getElementById('pay-qrcode-area');
+  qrArea.innerHTML = '<div id="pay-loading-spin" style="width:40px;height:40px;border:3px solid #c8a020;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:12px;"></div><p style="color:#888;font-size:13px;">⏳ 连接支付宝...</p>';
+  
+  // 重置outTradeNo
+  _payOutTradeNo = '';
   
   modal.classList.add('show');
   
-  // 确定支付类型：手机端微信，PC端支付宝
-  var payType = isMobile() ? 'wxpay' : 'alipay';
-  var amountKey = amount.toString(); // '6','12','25','60'
+  // 调用Worker生成支付宝当面付二维码
+  var amountKey = price < 10 ? '6' : (price < 20 ? '12' : (price < 40 ? '25' : '60'));
   
-  // 加载支付iframe
-  var payUrl = WORKER_URL + '/pay?amount=' + amountKey + '&type=' + payType + '&player=' + encodeURIComponent(playerName);
-  
-  setTimeout(function(){
-    if(loading) loading.style.display = 'none';
-    if(iframe){
-      iframe.src = payUrl;
-      iframe.style.display = 'block';
+  fetch(WORKER_URL + '/api/create', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount: amountKey })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    _payOutTradeNo = data.outTradeNo || '';
+    
+    if(data.success){
+      // SCF 返回成功，显示收款码
+      var qrUrl = data.qrCode;
+      if(qrUrl){
+        // 有动态二维码
+        qrArea.innerHTML =
+          '<img src="' + qrUrl + '" alt="扫码支付" style="max-width:220px;width:100%;margin:0 auto;display:block;">' +
+          '<p style="color:#1677FF;font-size:13px;margin:8px 0;">💙 支付宝扫码支付 ¥' + price + '</p>';
+      } else {
+        // 无动态二维码，用备用收款码
+        qrArea.innerHTML = '<img src="pay_qrcode.png" alt="扫码支付" style="max-width:220px;width:100%;display:block;margin:0 auto;" onerror="this.outerHTML=\\'<p style=color:#f44;>⚠️ 请放置收款码图片 pay_qrcode.png 到桌面</p>\\';"><p style="color:#888;font-size:12px;margin-top:6px;">📱 请使用支付宝扫码支付 ¥' + price + '</p>';
+      }
+      
+      document.getElementById('pay-auto-msg').textContent = '💡 付款后点击"我已付款"即可自动到账';
+      
+      // 显示确认按钮
+      var confirmBtn = document.getElementById('btn-confirm-pay');
+      confirmBtn.style.display = 'inline-block';
+      confirmBtn.textContent = '✅ 我已付款 ¥' + price + '，立即到账';
+      confirmBtn.onclick = function(){
+        // 通知 SCF 已付款
+        if(_payOutTradeNo){
+          fetch(WORKER_URL + '/api/confirm', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({outTradeNo: _payOutTradeNo})
+          }).catch(function(){});
+        }
+        _payDeliver(amount);
+      };
+      
+      // 启动轮询（检测 SCF 是否已确认）
+      _payStartPoll();
+      
+      // 10分钟过期
+      _payExpireTimer = setTimeout(function(){
+        var hint = document.getElementById('pay-timer-hint');
+        if(hint && _payPendingPoints > 0) hint.textContent = '⚠️ 订单已过期，请重新充值';
+      }, 600000);
+    } else {
+      // SCF 返回失败
+      var fb = document.getElementById('pay-fallback-text');
+      fb.style.display = 'block';
+      fb.textContent = '⚠️ ' + (data.error || '服务暂不可用，请使用备用方式');
+      
+      qrArea.innerHTML = '<img src="pay_qrcode.png" alt="扫码支付" style="max-width:220px;width:100%;display:block;margin:0 auto;" onerror="this.outerHTML=\\'<p style=color:#f44;>⚠️ 请放置收款码</p>\\';"><p style="color:#888;font-size:12px;">使用备用收款码支付 ¥' + price + '</p>';
+      
+      var confirmBtn2 = document.getElementById('btn-confirm-pay');
+      confirmBtn2.style.display = 'inline-block';
+      confirmBtn2.textContent = '✅ 我已付款 ¥' + price + '，立即到账';
+      confirmBtn2.onclick = function(){
+        _payDeliver(amount);
+      };
+      document.getElementById('pay-auto-msg').textContent = '💡 付款完成后，点击下方按钮即可到账';
     }
-  }, 500);
+  })
+  .catch(function(err){
+    // 网络错误：显示备用方案
+    var fb = document.getElementById('pay-fallback-text');
+    fb.style.display = 'block';
+    fb.textContent = '⚠️ 网络错误，使用备用支付方式';
+    
+    qrArea.innerHTML = '<img src="pay_qrcode.png" alt="扫码支付" style="max-width:220px;width:100%;display:block;margin:0 auto;"><p style="color:#888;font-size:12px;">使用备用收款码支付</p>';
+    
+    document.getElementById('btn-confirm-pay').style.display = 'inline-block';
+    document.getElementById('btn-confirm-pay').textContent = '✅ 我已付款，立即到账';
+    document.getElementById('btn-confirm-pay').onclick = function(){
+      _payDeliver(amount);
+    };
+    document.getElementById('pay-auto-msg').textContent = '💡 付款完成后，点击下方按钮即可到账';
+  });
   
-  // 保存待发放积分
   _payPendingPoints = amount;
 }
 
 function closePayModal(){
+  _payStopPoll();
   var modal = document.getElementById('pay-modal');
   if(modal) modal.classList.remove('show');
-  // 清空iframe防止后台继续轮询
-  var iframe = document.getElementById('pay-iframe');
-  if(iframe) iframe.src = 'about:blank';
 }
 
-// 监听支付成功的postMessage
-window.addEventListener('message', function(event){
-  // 验证消息来源（支付成功通知）
-  if(!event.data || event.data.type !== 'payment_success') return;
-  
-  var points = event.data.points || _payPendingPoints;
-  
-  // 自动加积分
-  G.wallet += points;
-  try { saveWalletForUser(); } catch(e) {}
-  
-  // 更新UI
-  updateWalletDisplay();
-  
-  // 显示成功提示
-  var info = document.getElementById('pay-info');
-  if(info) info.textContent = '✅ 支付成功！+' + points + ' 积分已到账';
-  document.getElementById('pay-auto-msg').textContent = '✅ 积分已自动到账！可以关闭此窗口';
-  document.getElementById('pay-auto-msg').style.color = '#4ec94e';
-  document.getElementById('pay-title').textContent = '✅ 充值成功';
-  
-  _payPendingPoints = 0;
-});
+// 旧confirmPayment兼容
+function confirmPayment(){
+  if(_payPendingPoints > 0) _payDeliver(_payPendingPoints);
+}
 
 function isMobile(){
   return /Android|iPhone|iPad|iPod|webOS/i.test(navigator.userAgent);
